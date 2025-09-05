@@ -1,42 +1,166 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0f131c;
+  --foreground: #ffffff;
+  --primary: #8b5cf6;
+  --primary-foreground: #ffffff;
+  --secondary: #1f1f1f;
+  --secondary-foreground: #e5e5e5;
+  --accent: #a855f7;
+  --accent-foreground: #ffffff;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #374151;
+  --input: #1f1f1f;
+  --ring: #8b5cf6;
+  --radius: 0.75rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Light theme variables (toggle via data-theme attribute) */
+:root[data-theme="light"] {
+  --background: #f1f3f4;
+  --foreground: #374151;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: #374151;
+  --accent: #4f46e5;
+  --accent-foreground: #ffffff;
+  --destructive: #e11d48;
+  --destructive-foreground: #ffffff;
+  --border: #d1d5db;
+  --input: #ffffff;
+  --ring: #4f46e5;
+  --radius: 0.75rem;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+html, body, #__next {
+  height: 100%;
 }
 
 * {
-  box-sizing: border-box;
-  padding: 0;
+  border-color: hsl(var(--border));
+}
+
+body {
+  color: hsl(var(--foreground));
+  background: var(--background);
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
   margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  * { border-color: hsl(var(--border)); }
+  body { @apply bg-background text-foreground; }
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+@layer components {
+  .main-form {
+    background: linear-gradient(135deg, rgba(255,255,255,0.035) 0%, rgba(255,255,255,0.08) 100%);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: var(--radius);
+    backdrop-filter: saturate(1.1) blur(6px);
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:from-purple-700 hover:via-purple-800 hover:to-purple-900 text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-purple-500/20 backdrop-blur-sm;
+  }
+  .btn-secondary {
+    @apply bg-gray-800/20 hover:bg-gray-700/30 text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-gray-700/50 backdrop-blur-sm;
+  }
+  .panel-base {
+    @apply bg-white/5 backdrop-blur-sm border border-gray-600/30 rounded-2xl;
+    background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%);
+  }
+  .card {
+    @apply bg-gray-800/20 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6;
+  }
+  .input-field {
+    @apply bg-gray-800/20 border border-gray-700/50 text-white placeholder-gray-400 rounded-2xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 backdrop-blur-sm transition-all duration-200;
+  }
+  .floating-menu {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 19, 28, 0.9);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 50;
+    backdrop-filter: saturate(1.2) blur(6px);
+    transition: all 0.3s ease;
+  }
+
+  /* Light theme floating menu */
+  [data-theme="light"] .floating-menu {
+    background: rgba(248, 250, 252, 0.9);
+    color: #0f172a;
+    border: 1px solid rgba(0,0,0,.08);
+  }
+
+  /* Light theme adjustments */
+  [data-theme="light"] .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 border border-gray-200;
+  }
+
+  [data-theme="light"] .card {
+    @apply bg-white border border-gray-200 shadow-sm;
+  }
+
+  [data-theme="light"] .input-field {
+    @apply bg-white border border-gray-300 text-gray-900 placeholder-gray-500;
+  }
+
+  /* Text colors for light theme */
+  [data-theme="light"] .text-white {
+    @apply text-gray-900;
+  }
+
+  [data-theme="light"] .text-gray-300 {
+    @apply text-gray-600;
+  }
+
+  [data-theme="light"] .text-gray-400 {
+    @apply text-gray-500;
+  }
+
+  /* Light theme header */
+  [data-theme="light"] .header-item {
+    @apply bg-white/90 border border-gray-200 shadow-sm;
+  }
+
+  [data-theme="light"] .header-text {
+    @apply text-gray-700;
+  }
+
+  /* Light theme main form */
+  [data-theme="light"] .main-form {
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%);
+    border: 1px solid rgba(209,213,219,0.5);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  /* Light theme buttons */
+  [data-theme="light"] .toggle-button-active {
+    background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 55%, #6d28d9 100%);
+  }
+
+  [data-theme="light"] .toggle-button-inactive {
+    @apply bg-gray-100 text-gray-600 border border-gray-200;
+  }
+
+  /* Garantir texto branco em botões roxos no tema claro */
+  [data-theme="light"] .btn-primary,
+  [data-theme="light"] .toggle-button-active {
+    color: #ffffff !important;
   }
 }
