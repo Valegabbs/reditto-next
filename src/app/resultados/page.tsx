@@ -118,7 +118,7 @@ export default function ResultadosPage() {
             <div className="grid grid-cols-5 gap-2 mb-6">
               {Object.entries(result.competencies).map(([competency, score]) => (
                 <div key={competency} className="text-center">
-                  <div className="text-2xl font-bold text-purple-300">{score}</div>
+                  <div className="text-2xl font-bold text-purple-300">{score as number}</div>
                   <div className="text-xs text-gray-400">{competency.replace('Competência ', 'C')}</div>
                 </div>
               ))}
@@ -142,7 +142,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Pontos Positivos</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {result.feedback.congratulations.map((item, index) => (
+            {result.feedback.congratulations.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <CheckCircle size={16} className="text-green-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -158,7 +158,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Sugestões de Melhoria</h2>
           </div>
           <div className="space-y-3">
-            {result.feedback.improvements.map((item, index) => (
+            {result.feedback.improvements.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <Lightbulb size={16} className="text-blue-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -174,7 +174,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Pontos de Atenção</h2>
           </div>
           <div className="space-y-3">
-            {result.feedback.attention.map((item, index) => (
+            {result.feedback.attention.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <Target size={16} className="text-yellow-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -209,9 +209,9 @@ export default function ResultadosPage() {
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-white font-semibold text-lg">{competency}</h3>
                     <div className="text-right">
-                      <div className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</div>
+                      <div className={`text-2xl font-bold ${getScoreColor(score as number)}`}>{score as number}</div>
                       <div className="text-xs text-gray-400">/ 200 pontos</div>
-                      <div className={`text-xs ${getScoreColor(score)}`}>{getScoreDescription(score)}</div>
+                      <div className={`text-xs ${getScoreColor(score as number)}`}>{getScoreDescription(score as number)}</div>
                     </div>
                   </div>
                   
@@ -220,12 +220,12 @@ export default function ResultadosPage() {
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div 
                         className={`h-2 rounded-full ${
-                          score >= 160 ? 'bg-green-400' :
-                          score >= 120 ? 'bg-blue-400' :
-                          score >= 80 ? 'bg-yellow-400' :
-                          score >= 40 ? 'bg-orange-400' : 'bg-red-400'
+                          (score as number) >= 160 ? 'bg-green-400' :
+                          (score as number) >= 120 ? 'bg-blue-400' :
+                          (score as number) >= 80 ? 'bg-yellow-400' :
+                          (score as number) >= 40 ? 'bg-orange-400' : 'bg-red-400'
                         }`}
-                        style={{ width: `${(score / 200) * 100}%` }}
+                        style={{ width: `${((score as number) / 200) * 100}%` }}
                       ></div>
                     </div>
                   </div>
