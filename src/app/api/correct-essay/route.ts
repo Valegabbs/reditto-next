@@ -17,58 +17,35 @@ interface EssayResult {
   originalEssay: string;
 }
 
+// Configurações de segurança - API Key protegida no servidor
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
 const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 
-async function extractTextFromImage(imageBuffer: Buffer): Promise<string> {
-  try {
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://redigitto.com',
-        'X-Title': 'Redigitto OCR'
-      },
-      body: JSON.stringify({
-        model: 'openai/gpt-4o',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Extraia o texto desta imagem de redação. Retorne apenas o texto puro, sem formatação adicional.'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${imageBuffer.toString('base64')}`
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 2000
-      })
-    });
+// Configurações de segurança
+const MAX_TEXT_LENGTH = 5000;
+const MIN_TEXT_LENGTH = 200;
+const MAX_TOPIC_LENGTH = 200;
 
-    if (!response.ok) {
-      throw new Error('Erro na API de OCR');
-    }
-
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (error) {
-    console.error('Erro no OCR:', error);
-    throw new Error('Falha ao extrair texto da imagem');
-  }
+// Validação adicional da API Key
+function validateApiKey(): boolean {
+  if (!OPENROUTER_API_KEY) return false;
+  if (OPENROUTER_API_KEY === 'your_openrouter_api_key_here') return false;
+  if (OPENROUTER_API_KEY.length < 20) return false;
+  if (!OPENROUTER_API_KEY.startsWith('sk-or-')) return false;
+  return true;
 }
 
 async function analyzeEssay(essayText: string, topic?: string): Promise<EssayResult> {
+  console.log('🔍 Iniciando análise da redação...');
+  console.log('📝 Texto a ser analisado (comprimento):', essayText.length);
+  console.log('🎯 Tema:', topic || 'Não especificado');
+
   try {
-    const prompt = `
-Analise esta redação seguindo os critérios do ENEM e retorne um JSON com a seguinte estrutura:
+    const prompt = `INSTRUÇÕES: Você é um corretor especialista em redações do ENEM. Analise esta redação seguindo rigorosamente os critérios oficiais do ENEM.
+
+IMPORTANTE: Retorne APENAS um JSON válido, sem texto antes ou depois, sem formatação markdown, sem explicações adicionais.
+
+Estrutura do JSON:
 
 {
   "finalScore": número de 0 a 1000,
@@ -80,134 +57,284 @@ Analise esta redação seguindo os critérios do ENEM e retorne um JSON com a se
     "Competência V": número de 0 a 200
   },
   "feedback": {
-    "summary": "resumo geral da correção",
-    "improvements": ["ponto 1", "ponto 2", "ponto 3"],
-    "attention": ["atenção 1", "atenção 2", "atenção 3"],
-    "congratulations": ["parabéns 1", "parabéns 2", "parabéns 3"],
+    "summary": "resumo geral detalhado da correção (2-3 parágrafos)",
+    "improvements": ["sugestão específica de melhoria 1", "sugestão específica de melhoria 2", "sugestão específica de melhoria 3"],
+    "attention": ["ponto de atenção crítico 1", "ponto de atenção crítico 2", "ponto de atenção crítico 3"],
+    "congratulations": ["aspecto positivo específico 1", "aspecto positivo específico 2", "aspecto positivo específico 3"],
     "competencyFeedback": {
-      "Competência I": "feedback específico",
-      "Competência II": "feedback específico",
-      "Competência III": "feedback específico",
-      "Competência IV": "feedback específico",
-      "Competência V": "feedback específico"
+      "Competência I": "feedback detalhado sobre domínio da modalidade escrita formal",
+      "Competência II": "feedback detalhado sobre compreensão do tema e tipo textual",
+      "Competência III": "feedback detalhado sobre seleção e organização de informações",
+      "Competência IV": "feedback detalhado sobre coesão e coerência",
+      "Competência V": "feedback detalhado sobre proposta de intervenção"
     }
   }
 }
 
-Tema da redação: ${topic || 'Não especificado'}
+**CRITÉRIOS DETALHADOS DO ENEM:**
 
-Redação:
+**Competência I - Domínio da modalidade escrita formal (0-200):**
+- 200 pontos: Demonstra excelente domínio da modalidade escrita formal da língua portuguesa e de escolha de registro. Desvios gramaticais ou de convenções da escrita são aceitos somente como excepcionalidade.
+- 160 pontos: Demonstra bom domínio da modalidade escrita formal, com poucos desvios gramaticais e de convenções da escrita.
+- 120 pontos: Demonstra domínio mediano da modalidade escrita formal, com alguns desvios gramaticais e de convenções da escrita.
+- 80 pontos: Demonstra domínio insuficiente da modalidade escrita formal, com muitos desvios gramaticais e de convenções da escrita.
+- 40 pontos: Demonstra domínio precário da modalidade escrita formal, com inúmeros desvios gramaticais e de convenções da escrita.
+- 0 pontos: Demonstra desconhecimento da modalidade escrita formal da língua portuguesa.
+
+**Competência II - Compreender a proposta de redação e aplicar conceitos das várias áreas de conhecimento (0-200):**
+- 200 pontos: Desenvolve o tema por meio de argumentação consistente, a partir de um repertório sociocultural produtivo e apresenta excelente domínio do texto dissertativo-argumentativo.
+- 160 pontos: Desenvolve o tema por meio de argumentação consistente e apresenta bom domínio do texto dissertativo-argumentativo, com proposição, argumentação e conclusão.
+- 120 pontos: Desenvolve o tema por meio de argumentação previsível e apresenta domínio mediano do texto dissertativo-argumentativo, com proposição, argumentação e conclusão.
+- 80 pontos: Desenvolve o tema recorrendo à cópia de trechos dos textos motivadores ou apresenta domínio insuficiente do texto dissertativo-argumentativo.
+- 40 pontos: Apresenta o assunto, tangenciando o tema, ou demonstra domínio precário do texto dissertativo-argumentativo.
+- 0 pontos: Fuga ao tema/não atendimento à estrutura dissertativo-argumentativa.
+
+**Competência III - Selecionar, relacionar, organizar e interpretar informações, fatos, opiniões e argumentos (0-200):**
+- 200 pontos: Apresenta informações, fatos e opiniões relacionados ao tema proposto, de forma consistente e organizada, configurando autoria, em defesa de um ponto de vista.
+- 160 pontos: Apresenta informações, fatos e opiniões relacionados ao tema, de forma organizada, com indícios de autoria, em defesa de um ponto de vista.
+- 120 pontos: Apresenta informações, fatos e opiniões relacionados ao tema, limitados aos argumentos dos textos motivadores e pouco organizados, em defesa de um ponto de vista.
+- 80 pontos: Apresenta informações, fatos e opiniões relacionados ao tema, mas desorganizados ou contraditórios e limitados aos argumentos dos textos motivadores.
+- 40 pontos: Apresenta informações, fatos e opiniões pouco relacionados ao tema ou incoerentes e sem defesa de um ponto de vista.
+- 0 pontos: Apresenta informações, fatos e opiniões não relacionados ao tema e sem defesa de um ponto de vista.
+
+**Competência IV - Demonstrar conhecimento dos mecanismos linguísticos necessários para a construção da argumentação (0-200):**
+- 200 pontos: Articula bem as partes do texto e apresenta repertório diversificado de recursos coesivos.
+- 160 pontos: Articula as partes do texto com poucas inadequações e apresenta repertório diversificado de recursos coesivos.
+- 120 pontos: Articula as partes do texto, de forma mediana, com inadequações, e apresenta repertório pouco diversificado de recursos coesivos.
+- 80 pontos: Articula as partes do texto, de forma insuficiente, com muitas inadequações e apresenta repertório limitado de recursos coesivos.
+- 40 pontos: Articula as partes do texto de forma precária.
+- 0 pontos: Não articula as informações.
+
+**Competência V - Elaborar proposta de intervenção para o problema abordado (0-200):**
+- 200 pontos: Elabora muito bem proposta de intervenção com detalhamento dos meios para realizá-la.
+- 160 pontos: Elabora bem proposta de intervenção relacionada ao tema e articulada à discussão desenvolvida no texto.
+- 120 pontos: Elabora, de forma mediana, proposta de intervenção relacionada ao tema e articulada à discussão desenvolvida no texto.
+- 80 pontos: Elabora, de forma insuficiente, proposta de intervenção relacionada ao tema, ou não articulada com a discussão desenvolvida no texto.
+- 40 pontos: Apresenta proposta de intervenção vaga, precária ou relacionada apenas ao assunto.
+- 0 pontos: Não apresenta proposta de intervenção ou apresenta proposta não relacionada ao tema ou ao assunto.
+
+**TEMA DA REDAÇÃO:** ${topic || 'Não especificado'}
+
+**REDAÇÃO A SER ANALISADA:**
 ${essayText}
 
-Competências ENEM:
-- Competência I: Modalidade escrita (0-200 pontos)
-- Competência II: Compreensão da proposta e aplicação de conceitos (0-200 pontos)
-- Competência III: Capacidade de selecionar, relacionar, organizar e interpretar informações (0-200 pontos)
-- Competência IV: Conhecimento dos mecanismos linguísticos necessários para a construção da argumentação (0-200 pontos)
-- Competência V: Elaboração de proposta de intervenção para o problema abordado (0-200 pontos)
+TAREFA: Analise cada competência detalhadamente e seja criterioso na pontuação. Forneça feedback construtivo e específico.
 
-Retorne apenas o JSON válido, sem texto adicional.
-`;
+LEMBRETE FINAL: Sua resposta deve ser APENAS o JSON válido, começando com { e terminando com }. Não inclua explicações, comentários ou formatação markdown.`;
+
+    console.log('📝 Enviando requisição para OpenRouter (DeepSeek Análise)...');
 
     const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://redigitto.com',
-        'X-Title': 'Redigitto Essay Analysis'
+        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+        "HTTP-Referer": "https://redigitto.com",
+        "X-Title": "Redigitto - Correção de Redação",
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: 'openai/gpt-4o',
-        messages: [
+        "model": "deepseek/deepseek-r1-0528:free",
+        "messages": [
           {
-            role: 'user',
-            content: prompt
+            "role": "user",
+            "content": prompt
           }
         ],
-        max_tokens: 3000,
-        temperature: 0.3
+        "max_tokens": 4000,
+        "temperature": 0.2
       })
     });
 
+    console.log('📊 Status da resposta Análise:', response.status);
+
     if (!response.ok) {
-      throw new Error('Erro na API de análise');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Erro na API de análise:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+      
+      // Mensagens de erro mais específicas
+      let errorMessage = 'Erro na API de análise';
+      if (response.status === 401) {
+        errorMessage = 'API Key inválida ou expirada';
+      } else if (response.status === 429) {
+        errorMessage = 'Muitas requisições. Tente novamente em alguns minutos';
+      } else if (response.status === 400) {
+        errorMessage = `Erro na requisição: ${errorData.error?.message || 'Dados inválidos'}`;
+      } else if (response.status >= 500) {
+        errorMessage = 'Servidor da OpenRouter temporariamente indisponível';
+      }
+      
+      throw new Error(`${errorMessage} (${response.status})`);
     }
 
     const data = await response.json();
-    const analysisText = data.choices[0].message.content;
+    console.log('✅ Resposta de análise recebida');
     
-    // Extrair JSON da resposta
-    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Resposta inválida da API');
+    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+      console.error('❌ Estrutura de resposta inválida:', data);
+      throw new Error('Resposta inválida da API de análise');
     }
 
-    const analysis: EssayResult = JSON.parse(jsonMatch[0]);
-    analysis.originalEssay = essayText;
+    const analysisText = data.choices[0].message.content;
+    console.log('📄 Resposta da análise (primeiros 200 chars):', analysisText?.substring(0, 200) || 'Vazio');
+    
+    // Extrair JSON da resposta - várias tentativas
+    let jsonText = analysisText.trim();
+    
+    // Tentativa 1: Extrair de bloco de código
+    const jsonCodeBlockMatch = analysisText.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/);
+    if (jsonCodeBlockMatch) {
+      jsonText = jsonCodeBlockMatch[1].trim();
+      console.log('📦 JSON extraído de bloco de código');
+    }
+    // Tentativa 2: Extrair JSON puro (do primeiro { ao último })
+    else {
+      const firstBrace = analysisText.indexOf('{');
+      const lastBrace = analysisText.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+        jsonText = analysisText.substring(firstBrace, lastBrace + 1).trim();
+        console.log('📦 JSON extraído por posição de chaves');
+      }
+      // Tentativa 3: Regex tradicional
+      else {
+        const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          jsonText = jsonMatch[0].trim();
+          console.log('📦 JSON extraído por regex');
+        }
+      }
+    }
+    
+    console.log('🔍 Tentando parsear JSON (primeiros 200 chars):', jsonText.substring(0, 200));
 
-    return analysis;
+    try {
+      const analysis: EssayResult = JSON.parse(jsonText);
+      analysis.originalEssay = essayText;
+      console.log('✅ JSON parseado com sucesso, nota final:', analysis.finalScore);
+      return analysis;
+    } catch (parseError) {
+      console.error('❌ Erro ao parsear JSON:', parseError);
+      console.error('📄 Texto que causou erro:', jsonText);
+      throw new Error('Resposta inválida da API - JSON malformado');
+    }
   } catch (error) {
-    console.error('Erro na análise:', error);
-    throw new Error('Falha ao analisar redação');
+    console.error('❌ Erro completo na análise:', error);
+    throw new Error(`Falha ao analisar redação: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
   }
 }
 
 export async function POST(request: NextRequest) {
+  console.log('🚀 === INICIANDO PROCESSAMENTO DE REDAÇÃO ===');
+  console.log('🔑 API Key status:', OPENROUTER_API_KEY ? `Configurada (${OPENROUTER_API_KEY.substring(0, 20)}...)` : 'NÃO CONFIGURADA');
+  
   try {
-    if (!OPENROUTER_API_KEY) {
+    // Verificar se a API key está configurada e válida
+    if (!validateApiKey()) {
+      console.error('❌ API Key do OpenRouter inválida ou não configurada');
       return NextResponse.json(
-        { error: 'API Key não configurada' },
+        { error: 'API Key do OpenRouter não configurada. Configure OPENROUTER_API_KEY no arquivo .env.local' },
         { status: 500 }
       );
     }
 
+    console.log('✅ API Key configurada');
+
+    // Adicionar headers de segurança
+    const responseHeaders = {
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'DENY',
+      'X-XSS-Protection': '1; mode=block',
+    };
+
     const formData = await request.formData();
     const topic = formData.get('topic') as string;
-    const submissionType = formData.get('submissionType') as string;
-    let essayText = '';
+    const essayText = formData.get('essayText') as string;
 
-    if (submissionType === 'text') {
-      essayText = formData.get('essayText') as string;
-      if (!essayText || essayText.length < 200) {
-        return NextResponse.json(
-          { error: 'Texto deve ter pelo menos 200 caracteres' },
-          { status: 400 }
-        );
-      }
-    } else if (submissionType === 'image') {
-      const imageFile = formData.get('image') as File;
-      if (!imageFile) {
-        return NextResponse.json(
-          { error: 'Imagem não fornecida' },
-          { status: 400 }
-        );
-      }
+    console.log('📝 Dados recebidos:', {
+      topic: topic || 'Não especificado',
+      textLength: essayText?.length || 0
+    });
 
-      const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
-      essayText = await extractTextFromImage(imageBuffer);
-      
-      if (!essayText || essayText.length < 200) {
-        return NextResponse.json(
-          { error: 'Texto extraído deve ter pelo menos 200 caracteres' },
-          { status: 400 }
-        );
-      }
-    } else {
+    // Validações de segurança para texto
+    if (!essayText) {
+      console.error('❌ Texto da redação não fornecido');
       return NextResponse.json(
-        { error: 'Tipo de envio inválido' },
-        { status: 400 }
+        { error: 'Texto da redação é obrigatório' },
+        { status: 400, headers: responseHeaders }
+      );
+    }
+    
+    if (essayText.length < MIN_TEXT_LENGTH) {
+      console.error('❌ Texto muito curto:', essayText.length);
+      return NextResponse.json(
+        { error: `Texto deve ter pelo menos ${MIN_TEXT_LENGTH} caracteres` },
+        { status: 400, headers: responseHeaders }
+      );
+    }
+    
+    if (essayText.length > MAX_TEXT_LENGTH) {
+      console.error('❌ Texto muito longo:', essayText.length);
+      return NextResponse.json(
+        { error: `Texto deve ter no máximo ${MAX_TEXT_LENGTH} caracteres` },
+        { status: 400, headers: responseHeaders }
       );
     }
 
-    const analysis = await analyzeEssay(essayText, topic);
+    // Validar o tópico se fornecido
+    if (topic && topic.length > MAX_TOPIC_LENGTH) {
+      console.error('❌ Tema muito longo:', topic.length);
+      return NextResponse.json(
+        { error: `Tema deve ter no máximo ${MAX_TOPIC_LENGTH} caracteres` },
+        { status: 400, headers: responseHeaders }
+      );
+    }
 
-    return NextResponse.json(analysis);
+    // Sanitizar o texto (remover caracteres perigosos)
+    const originalLength = essayText.length;
+    const sanitizedText = essayText.replace(/[<>]/g, '').trim();
+    
+    if (originalLength !== sanitizedText.length) {
+      console.log('🧹 Texto sanitizado');
+    }
+    
+    console.log('🔍 Iniciando análise da IA...');
+    const analysis = await analyzeEssay(sanitizedText, topic);
+
+    console.log('🎉 === PROCESSAMENTO CONCLUÍDO COM SUCESSO ===');
+    
+    // Retornar resultado diretamente (sem armazenamento por enquanto)
+    return NextResponse.json(analysis, { headers: responseHeaders });
+    
   } catch (error) {
-    console.error('Erro no processamento:', error);
+    console.error('❌ === ERRO NO PROCESSAMENTO ===');
+    console.error('Erro completo:', error);
+    
+    // Log detalhado do erro
+    if (error instanceof Error) {
+      console.error('Tipo de erro:', error.constructor.name);
+      console.error('Mensagem:', error.message);
+      console.error('Stack trace:', error.stack);
+    }
+    
+    // Não expor detalhes do erro para o cliente
+    const errorMessage = error instanceof Error && error.message.includes('API') 
+      ? 'Erro na comunicação com o serviço de análise. Tente novamente em alguns minutos.'
+      : 'Erro interno do servidor. Tente novamente.';
+    
     return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
+      { error: errorMessage },
+      { 
+        status: 500,
+        headers: {
+          'X-Content-Type-Options': 'nosniff',
+          'X-Frame-Options': 'DENY',
+          'X-XSS-Protection': '1; mode=block',
+        }
+      }
     );
   }
 }

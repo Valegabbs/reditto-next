@@ -20,24 +20,14 @@ reditto-next/
 │   ├── components/             # Componentes reutilizáveis
 │   └── types/                  # Definições de tipos TypeScript
 ├── public/                     # Arquivos estáticos
-├── env.example                 # Exemplo de variáveis de ambiente
 └── README.md                   # Documentação principal
-```
-
-## Variáveis de Ambiente
-
-Crie um arquivo `.env.local` na raiz do projeto com:
-
-```
-OPENROUTER_API_KEY=sua_chave_api_aqui
 ```
 
 ## Desenvolvimento
 
 1. Instale as dependências: `npm install`
-2. Configure as variáveis de ambiente
-3. Execute: `npm run dev`
-4. Acesse: http://localhost:3000
+2. Execute: `npm run dev`
+3. Acesse: http://localhost:3000
 
 ## Deploy
 
@@ -53,4 +43,3 @@ Para fazer deploy no Vercel:
 - **TypeScript** - Tipagem estática
 - **Tailwind CSS** - Estilização
 - **Lucide React** - Ícones
-- **OpenRouter API** - IA para correção

@@ -1,73 +1,71 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 
-interface EssayResult {
-  finalScore: number;
-  competencies: {
-    [key: string]: number;
-  };
-  feedback: {
-    summary: string;
-    improvements: string[];
-    attention: string[];
-    congratulations: string[];
-    competencyFeedback: {
-      [key: string]: string;
-    };
-  };
-  originalEssay: string;
-}
-
 export default function ResultadosPage() {
-  const [result, setResult] = useState<EssayResult | null>(null);
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const dataParam = urlParams.get('data');
     
     if (dataParam) {
+      // Dados vindos da API de correção
       try {
         const parsedData = JSON.parse(decodeURIComponent(dataParam));
         setResult(parsedData);
       } catch (error) {
         console.error('Erro ao parsear dados:', error);
-        // Dados de exemplo para demonstração
-        setResult({
-          finalScore: 780,
-          competencies: {
-            'Competência I': 180,
-            'Competência II': 160,
-            'Competência III': 140,
-            'Competência IV': 160,
-            'Competência V': 140
-          },
-          feedback: {
-            summary: "A redação aborda o tema da intolerância religiosa no Brasil de forma compreensiva e argumentativa, com exemplos históricos e atuais. A escrita é clara e coerente, mas há espaço para melhoria na profundidade dos argumentos e no detalhamento da proposta de intervenção.",
-            improvements: [
-              "Conexão mais explícita entre a citação de Einstein e o tema",
-              "Profundidade maior nos argumentos",
-              "Detalhamento maior na proposta de intervenção"
-            ],
-            attention: [
-              "Desenvolver mais a introdução para contextualizar a citação de Einstein",
-              "Incluir exemplos mais concretos de como a intolerância religiosa afeta a sociedade atualmente",
-              "Especificar os agentes e meios da proposta de intervenção"
-            ],
-            congratulations: [
-              "Escrita clara e coerente",
-              "Exemplos históricos e atuais relevantes",
-              "Conexão com direitos humanos"
-            ]
-          },
-          originalEssay: `"É mais fácil desintegrar um átomo que um preconceito". Com essa frase, Albert Einstein desvelou os entraves que envolvem o combate às diversas formas de discriminação existentes na sociedade. Isso inclui a intolerância religiosa, comportamento frequente que deve ser erradicado do Brasil. Desde a colonização, o país tem enfrentado desafios relacionados à diversidade religiosa, e é fundamental que medidas sejam implementadas para promover o respeito e a tolerância entre diferentes crenças.`
-        });
+        // Fallback para dados de exemplo
+        setResult(getExampleData());
       }
+    } else {
+      // Sem parâmetros: mostrar dados de exemplo
+      setResult(getExampleData());
     }
   }, []);
+
+  const getExampleData = () => {
+    return {
+      finalScore: 780,
+      competencies: {
+        'Competência I': 180,
+        'Competência II': 160,
+        'Competência III': 140,
+        'Competência IV': 160,
+        'Competência V': 140
+      },
+      feedback: {
+        summary: "A redação aborda o tema da intolerância religiosa no Brasil de forma compreensiva e argumentativa, com exemplos históricos e atuais. A escrita é clara e coerente, mas há espaço para melhoria na profundidade dos argumentos e no detalhamento da proposta de intervenção.",
+        improvements: [
+          "Conexão mais explícita entre a citação de Einstein e o tema",
+          "Profundidade maior nos argumentos", 
+          "Detalhamento maior na proposta de intervenção"
+        ],
+        attention: [
+          "Desenvolver mais a introdução para contextualizar a citação de Einstein",
+          "Incluir exemplos mais concretos de como a intolerância religiosa afeta a sociedade atualmente",
+          "Especificar os agentes e meios da proposta de intervenção"
+        ],
+        congratulations: [
+          "Escrita clara e coerente",
+          "Exemplos históricos e atuais relevantes",
+          "Conexão com direitos humanos"
+        ],
+        competencyFeedback: {
+          'Competência I': 'Demonstra bom domínio da modalidade escrita formal, com poucos desvios.',
+          'Competência II': 'Desenvolve o tema adequadamente com argumentação consistente.',
+          'Competência III': 'Apresenta informações organizadas em defesa do ponto de vista.',
+          'Competência IV': 'Articula as partes do texto com adequação mediana.',
+          'Competência V': 'Proposta de intervenção relacionada ao tema, mas com detalhamento insuficiente.'
+        }
+      },
+      originalEssay: 'É mais fácil desintegrar um átomo que um preconceito. Com essa frase, Albert Einstein desvelou os entraves que envolvem o combate às diversas formas de discriminação existentes na sociedade.'
+    };
+  };
 
   const handleNewEssay = () => {
     window.location.href = '/envio';
@@ -77,18 +75,18 @@ export default function ResultadosPage() {
     window.print();
   };
 
-      if (!result) {
-      return (
-        <ClientWrapper>
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-white text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
-              <p>Carregando resultados...</p>
-            </div>
+  if (!result) {
+    return (
+      <ClientWrapper>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p>Carregando resultados...</p>
           </div>
-        </ClientWrapper>
-      );
-    }
+        </div>
+      </ClientWrapper>
+    );
+  }
 
   return (
     <ClientWrapper>
@@ -96,38 +94,152 @@ export default function ResultadosPage() {
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6">
-                 {/* Congratulations Banner */}
-         <div className="bg-green-600/20 backdrop-blur-xl border border-green-500/30 rounded-2xl p-4 mb-6">
-          <div className="flex items-center gap-3 mb-3">
-            <CheckCircle size={24} className="text-white" />
-            <h2 className="text-white font-semibold text-lg">Parabéns!</h2>
+        {/* Score Overview */}
+        <div className="card mb-8">
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Award size={32} className="text-yellow-400" />
+              <h1 className="text-3xl font-bold text-white">Resultado da Correção</h1>
+            </div>
+            <div className="mb-6">
+              <div className="text-6xl font-bold text-purple-400 mb-2">{result.finalScore}</div>
+              <div className="text-gray-300 text-lg">pontos de 1000</div>
+              <div className="mt-3 text-white text-sm">
+                {result.finalScore >= 900 ? "Excelente! Redação nota 1000!" :
+                 result.finalScore >= 800 ? "Muito bom! Ótima redação!" :
+                 result.finalScore >= 700 ? "Bom desempenho! Continue melhorando!" :
+                 result.finalScore >= 600 ? "Desempenho mediano. Há espaço para melhoria." :
+                 result.finalScore >= 400 ? "Desempenho insuficiente. Foque nos pontos de atenção." :
+                 "Desempenho precário. Revise os critérios do ENEM."}
+              </div>
+            </div>
+            
+            {/* Quick Competency Overview */}
+            <div className="grid grid-cols-5 gap-2 mb-6">
+              {Object.entries(result.competencies).map(([competency, score]) => (
+                <div key={competency} className="text-center">
+                  <div className="text-2xl font-bold text-purple-300">{score}</div>
+                  <div className="text-xs text-gray-400">{competency.replace('Competência ', 'C')}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <ul className="text-white space-y-1">
-            {result.feedback.congratulations.map((item, index) => (
-              <li key={index} className="flex items-center gap-2">
-                <span className="w-2 h-2 bg-white rounded-full"></span>
-                {item}
-              </li>
-            ))}
-          </ul>
         </div>
 
-        {/* Feedback by Competency */}
-        <div className="mb-8">
-          <h2 className="text-white text-xl font-semibold mb-4">Feedback por Competência</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Object.entries(result.competencies).map(([competency, score]) => (
-              <div key={competency} className="card">
-                <h3 className="text-white font-medium mb-2">{competency}</h3>
-                <p className="text-gray-300 text-sm">
-                  {result.feedback.competencyFeedback[competency] || 
-                   `Pontuação: ${score} pontos. ${competency === 'Competência I' ? 'Modalidade Escrita' : 
-                   competency === 'Competência II' ? 'Compreensão do Tema' :
-                   competency === 'Competência III' ? 'Argumentação' :
-                   competency === 'Competência IV' ? 'Coesão e Coerência' : 'Proposta de Intervenção'}`}
-                </p>
+        {/* Summary Section */}
+        <div className="card mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <Brain size={24} className="text-purple-400" />
+            <h2 className="text-white text-xl font-semibold">Resumo da Análise</h2>
+          </div>
+          <p className="text-gray-300 leading-relaxed">{result.feedback.summary}</p>
+        </div>
+
+        {/* Congratulations Banner */}
+        <div className="bg-green-600/20 backdrop-blur-xl border border-green-500/30 rounded-2xl p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <CheckCircle size={24} className="text-green-400" />
+            <h2 className="text-white font-semibold text-lg">Pontos Positivos</h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {result.feedback.congratulations.map((item, index) => (
+              <div key={index} className="flex items-start gap-3 text-white">
+                <CheckCircle size={16} className="text-green-400 mt-1 flex-shrink-0" />
+                <span className="text-sm">{item}</span>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Improvements Section */}
+        <div className="bg-blue-600/20 backdrop-blur-xl border border-blue-500/30 rounded-2xl p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <TrendingUp size={24} className="text-blue-400" />
+            <h2 className="text-white font-semibold text-lg">Sugestões de Melhoria</h2>
+          </div>
+          <div className="space-y-3">
+            {result.feedback.improvements.map((item, index) => (
+              <div key={index} className="flex items-start gap-3 text-white">
+                <Lightbulb size={16} className="text-blue-400 mt-1 flex-shrink-0" />
+                <span className="text-sm">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Attention Points */}
+        <div className="bg-yellow-600/20 backdrop-blur-xl border border-yellow-500/30 rounded-2xl p-6 mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertTriangle size={24} className="text-yellow-400" />
+            <h2 className="text-white font-semibold text-lg">Pontos de Atenção</h2>
+          </div>
+          <div className="space-y-3">
+            {result.feedback.attention.map((item, index) => (
+              <div key={index} className="flex items-start gap-3 text-white">
+                <Target size={16} className="text-yellow-400 mt-1 flex-shrink-0" />
+                <span className="text-sm">{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Detailed Competency Analysis */}
+        <div className="mb-8">
+          <h2 className="text-white text-xl font-semibold mb-6">Análise Detalhada por Competência</h2>
+          <div className="space-y-6">
+            {Object.entries(result.competencies).map(([competency, score]) => {
+              const getScoreColor = (score: number) => {
+                if (score >= 160) return 'text-green-400';
+                if (score >= 120) return 'text-blue-400';
+                if (score >= 80) return 'text-yellow-400';
+                if (score >= 40) return 'text-orange-400';
+                return 'text-red-400';
+              };
+              
+              const getScoreDescription = (score: number) => {
+                if (score >= 160) return 'Excelente/Bom';
+                if (score >= 120) return 'Mediano';
+                if (score >= 80) return 'Insuficiente';
+                if (score >= 40) return 'Precário';
+                return 'Muito Precário';
+              };
+
+              return (
+                <div key={competency} className="card">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-white font-semibold text-lg">{competency}</h3>
+                    <div className="text-right">
+                      <div className={`text-2xl font-bold ${getScoreColor(score)}`}>{score}</div>
+                      <div className="text-xs text-gray-400">/ 200 pontos</div>
+                      <div className={`text-xs ${getScoreColor(score)}`}>{getScoreDescription(score)}</div>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="mb-4">
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div 
+                        className={`h-2 rounded-full ${
+                          score >= 160 ? 'bg-green-400' :
+                          score >= 120 ? 'bg-blue-400' :
+                          score >= 80 ? 'bg-yellow-400' :
+                          score >= 40 ? 'bg-orange-400' : 'bg-red-400'
+                        }`}
+                        style={{ width: `${(score / 200) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <p className="text-gray-300 text-sm leading-relaxed">
+                    {result.feedback.competencyFeedback[competency] || 
+                     `Pontuação: ${score} pontos. ${competency === 'Competência I' ? 'Avalia o domínio da modalidade escrita formal da língua portuguesa.' : 
+                     competency === 'Competência II' ? 'Avalia a compreensão do tema e aplicação de conceitos.' :
+                     competency === 'Competência III' ? 'Avalia a capacidade de argumentação e organização de ideias.' :
+                     competency === 'Competência IV' ? 'Avalia os mecanismos linguísticos para construção da argumentação.' : 'Avalia a elaboração de proposta de intervenção.'}`}
+                  </p>
+                </div>
+              );
+            })}
           </div>
         </div>
 

@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Redigitto - Correção de Redação para Todos!",
-  description: "Plataforma de correção de redações com IA",
+  title: "Reditto",
+  description: "Plataforma de correção de redações",
   icons: {
-    icon: '/logo reditto.png',
+    icon: [
+      { url: '/logo reditto.png?v=2', type: 'image/png' },
+    ],
+    shortcut: ['/logo reditto.png?v=2'],
+    apple: ['/logo reditto.png?v=2'],
   },
 };
 
@@ -20,7 +25,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={inter.className}>
-        {children}
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
