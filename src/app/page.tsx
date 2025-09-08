@@ -63,12 +63,14 @@ export default function HomePage() {
       // Aguardar um pouco para a autenticação ser processada
       console.log('⏳ Aguardando autenticação...');
       
-      // Aguardar até 3 segundos pela autenticação
+      // Aguardar até 5 segundos pela autenticação
       let attempts = 0;
-      const maxAttempts = 30; // 3 segundos com verificações a cada 100ms
+      const maxAttempts = 50; // 5 segundos com verificações a cada 100ms
       
       const checkAuth = () => {
         attempts++;
+        console.log(`Tentativa ${attempts}/${maxAttempts} - User: ${user ? 'Sim' : 'Não'}, Session: ${session ? 'Sim' : 'Não'}`);
+        
         if (user && session) {
           console.log('✅ Usuário autenticado, redirecionando...');
           window.location.href = '/envio';

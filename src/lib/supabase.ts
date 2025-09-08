@@ -65,14 +65,24 @@ export const isSupabaseConfigured = () => {
 // Função para testar conectividade com Supabase
 export const testSupabaseConnection = async () => {
   if (!isSupabaseConfigured()) {
+    console.log('❌ Supabase não configurado para teste de conexão')
     return false
   }
   
   try {
+    console.log('🔄 Testando conexão com Supabase...')
     // Tentar uma operação simples para testar conectividade
-    const { error } = await supabase.auth.getSession()
-    return !error
-  } catch {
+    const { data, error } = await supabase.auth.getSession()
+    
+    if (error) {
+      console.log('❌ Erro na conexão:', error.message)
+      return false
+    }
+    
+    console.log('✅ Conexão com Supabase funcionando')
+    return true
+  } catch (error) {
+    console.log('❌ Erro inesperado na conexão:', error)
     return false
   }
 }

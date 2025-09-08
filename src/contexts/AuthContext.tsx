@@ -99,6 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       console.log('🔄 Tentando criar conta para:', email);
+      console.log('📝 Dados do cadastro:', { email, name, passwordLength: password.length });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -115,6 +117,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log('✅ Cadastro realizado com sucesso:', data);
+      
+      // Verificar se o usuário foi criado
+      if (data.user) {
+        console.log('👤 Usuário criado:', data.user.email);
+        console.log('📧 Email confirmado:', data.user.email_confirmed_at);
+      }
+      
       return { error: null };
     } catch (error) {
       console.error('❌ Erro inesperado no cadastro:', error);
@@ -130,6 +139,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
     try {
       console.log('🔄 Tentando fazer login para:', email);
+      console.log('🔑 Dados do login:', { email, passwordLength: password.length });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -141,6 +152,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log('✅ Login realizado com sucesso:', data);
+      
+      // Verificar se a sessão foi criada
+      if (data.session) {
+        console.log('🔐 Sessão criada:', data.session.access_token ? 'Sim' : 'Não');
+        console.log('👤 Usuário logado:', data.user?.email);
+      }
+      
       return { error: null };
     } catch (error) {
       console.error('❌ Erro inesperado no login:', error);
