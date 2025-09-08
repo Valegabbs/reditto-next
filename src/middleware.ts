@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
 
 // Rate limiting simple (em produção, use Redis)
 const requestCounts = new Map<string, { count: number; resetTime: number }>();
@@ -37,6 +38,26 @@ function isRateLimited(ip: string, limit: number = 20, windowMs: number = 60000)
   return false;
 }
 
+// Função para verificar autenticação
+async function checkAuth(request: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    return null;
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey);
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session;
+  } catch (error) {
+    console.error('Erro ao verificar sessão:', error);
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   // Aplicar rate limiting nas APIs
   if (request.nextUrl.pathname.startsWith('/api/')) {
@@ -71,7 +92,7 @@ export function middleware(request: NextRequest) {
     "style-src 'self' 'unsafe-inline'; " +
     "img-src 'self' data: blob:; " +
     "font-src 'self'; " +
-    "connect-src 'self' https://*.supabase.co; " +
+    "connect-src 'self'; " +
     "media-src 'none'; " +
     "object-src 'none'; " +
     "base-uri 'self';"
