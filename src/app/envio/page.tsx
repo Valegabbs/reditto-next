@@ -28,63 +28,29 @@ export default function EnvioPage() {
     setIsLoading(true);
 
     try {
-      console.log('📤 Iniciando processamento da redação...');
-      
-      let finalEssayText = essayText;
-      
-      // Se for imagem, primeiro extrair o texto
+      // Preparar payload para página de processamento
       if (submissionType === 'image' && selectedImage) {
-        console.log('🖼️ Extraindo texto da imagem...');
-        
-        const ocrFormData = new FormData();
-        ocrFormData.append('image', selectedImage);
-        
-        const ocrResponse = await fetch('/api/extract-text', {
-          method: 'POST',
-          body: ocrFormData,
+        // Converter imagem para Data URL para transportar entre páginas
+        const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = (err) => reject(err);
+          reader.readAsDataURL(file);
         });
 
-        if (!ocrResponse.ok) {
-          const errorData = await ocrResponse.json().catch(() => ({ error: 'Erro no OCR' }));
-          throw new Error(errorData.error || 'Falha ao extrair texto da imagem');
-        }
-
-        const ocrResult = await ocrResponse.json();
-        finalEssayText = ocrResult.extractedText;
-        console.log('✅ Texto extraído com sucesso:', finalEssayText.length, 'caracteres');
-      }
-      
-      // Agora enviar para correção
-      console.log('📝 Enviando redação para análise...');
-      
-      const correctionFormData = new FormData();
-      correctionFormData.append('topic', topic);
-      correctionFormData.append('essayText', finalEssayText);
-
-      const response = await fetch('/api/correct-essay', {
-        method: 'POST',
-        body: correctionFormData,
-      });
-
-      console.log('📊 Status da resposta:', response.status);
-
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Análise concluída com sucesso');
-        
-        // Histórico removido do MVP - funcionalidade será adicionada no roadmap
-        
-        // Redirecionar para página de resultados com os dados
-        window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
+        const dataUrl = await toDataUrl(selectedImage);
+        const job = { type: 'image' as const, topic, imageDataUrl: dataUrl };
+        sessionStorage.setItem('reditto-processing', JSON.stringify(job));
       } else {
-        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-        console.error('❌ Erro na resposta:', errorData);
-        alert(`Erro ao processar a redação: ${errorData.error || 'Tente novamente.'}`);
+        const job = { type: 'text' as const, topic, essayText };
+        sessionStorage.setItem('reditto-processing', JSON.stringify(job));
       }
+
+      // Ir para a tela de processamento
+      window.location.href = '/processando';
     } catch (error) {
-      console.error('❌ Erro no envio:', error);
-      alert(`Erro ao processar a redação: ${error instanceof Error ? error.message : 'Verifique sua conexão e tente novamente.'}`);
-    } finally {
+      console.error('❌ Erro ao preparar envio:', error);
+      alert(`Erro ao preparar o processamento: ${error instanceof Error ? error.message : 'Tente novamente.'}`);
       setIsLoading(false);
     }
   };
@@ -102,7 +68,7 @@ export default function EnvioPage() {
           {/* Header */}
           <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
             <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-              <Image src="/logo reditto.png" alt="Redigitto Logo" width={20} height={20} className="w-5 h-5" />
+              <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
               <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
             </div>
             <div className="flex items-center gap-3">
@@ -139,7 +105,7 @@ export default function EnvioPage() {
               </p>
               {user && (
                 <p className="text-purple-400 text-sm mt-2">
-                  Olá, {user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto MVP.
+                  Olá, {user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto.
                 </p>
               )}
               {!isConfigured && (

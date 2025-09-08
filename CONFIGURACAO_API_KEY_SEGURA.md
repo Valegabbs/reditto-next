@@ -18,7 +18,7 @@ Sua API Key é um dado **CRÍTICO** e deve ser protegida com máxima segurança!
 **IMPORTANTE**: Substitua `your_openrouter_api_key_here` pela sua chave real no arquivo `.env.local`
 
 ```env
-# Variáveis de ambiente para o Redigitto
+# Variáveis de ambiente para o Reditto
 OPENROUTER_API_KEY=sk-or-v1-sua_chave_real_aqui
 NEXT_PUBLIC_SUPABASE_URL=https://imrqgircligznruvudpf.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnFnaXJjbGlnem5ydXZ1ZHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTg2OTEsImV4cCI6MjA3MjY3NDY5MX0.O3VORx2CCGdvaQ004ACIme32Y1dlx5S2PjbudxaCNrUs

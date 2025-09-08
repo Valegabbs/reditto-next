@@ -128,8 +128,8 @@ LEMBRETE FINAL: Sua resposta deve ser APENAS o JSON válido, começando com { e 
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://redigitto.com",
-        "X-Title": "Redigitto - Correção de Redação",
+        "HTTP-Referer": "https://reditto.com",
+        "X-Title": "Reditto - Correção de Redação",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

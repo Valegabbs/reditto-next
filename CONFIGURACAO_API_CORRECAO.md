@@ -10,7 +10,7 @@ A API de correção de redação foi implementada com o modelo **"deepseek/deeps
 Crie um arquivo `.env.local` na raiz do projeto:
 
 ```env
-# Variáveis de ambiente para o Redigitto
+# Variáveis de ambiente para o Reditto
 
 # OpenRouter API Key
 # Obtenha sua chave em: https://openrouter.ai/keys

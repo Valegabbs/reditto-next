@@ -36,8 +36,8 @@ async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: stri
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://redigitto.com",
-        "X-Title": "Redigitto - OCR de Redação",
+        "HTTP-Referer": "https://reditto.com",
+        "X-Title": "Reditto - OCR de Redação",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

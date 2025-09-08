@@ -1,4 +1,4 @@
-# Redigitto - Plataforma de Redação (MVP)
+# Reditto - Plataforma de Redação (MVP)
 
 Uma plataforma moderna para prática de redação, desenvolvida com Next.js.
 

@@ -37,7 +37,7 @@ const nextConfig: NextConfig = {
   },
   publicRuntimeConfig: {
     // Variáveis públicas (apenas para configurações não sensíveis)
-    appName: 'Redigitto',
+    appName: 'Reditto',
   },
 };
 

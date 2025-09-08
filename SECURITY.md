@@ -1,4 +1,4 @@
-# 🔒 Relatório de Segurança - Redigitto
+# 🔒 Relatório de Segurança - Reditto
 
 ## ✅ **MEDIDAS DE SEGURANÇA IMPLEMENTADAS**
 

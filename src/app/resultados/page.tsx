@@ -102,21 +102,21 @@ export default function ResultadosPage() {
               <h1 className="text-3xl font-bold text-white">Resultado da Correção</h1>
             </div>
             <div className="mb-6">
-              <div className="text-6xl font-bold text-purple-400 mb-2">{result.finalScore}</div>
+              <div className="text-6xl font-bold text-purple-400 mb-2">{result.finalScore || 0}</div>
               <div className="text-gray-300 text-lg">pontos de 1000</div>
               <div className="mt-3 text-white text-sm">
-                {result.finalScore >= 900 ? "Excelente! Redação nota 1000!" :
-                 result.finalScore >= 800 ? "Muito bom! Ótima redação!" :
-                 result.finalScore >= 700 ? "Bom desempenho! Continue melhorando!" :
-                 result.finalScore >= 600 ? "Desempenho mediano. Há espaço para melhoria." :
-                 result.finalScore >= 400 ? "Desempenho insuficiente. Foque nos pontos de atenção." :
+                {(result.finalScore || 0) >= 900 ? "Excelente! Redação nota 1000!" :
+                 (result.finalScore || 0) >= 800 ? "Muito bom! Ótima redação!" :
+                 (result.finalScore || 0) >= 700 ? "Bom desempenho! Continue melhorando!" :
+                 (result.finalScore || 0) >= 600 ? "Desempenho mediano. Há espaço para melhoria." :
+                 (result.finalScore || 0) >= 400 ? "Desempenho insuficiente. Foque nos pontos de atenção." :
                  "Desempenho precário. Revise os critérios do ENEM."}
               </div>
             </div>
             
             {/* Quick Competency Overview */}
             <div className="grid grid-cols-5 gap-2 mb-6">
-              {Object.entries(result.competencies).map(([competency, score]) => (
+              {result.competencies && Object.entries(result.competencies).map(([competency, score]) => (
                 <div key={competency} className="text-center">
                   <div className="text-2xl font-bold text-purple-300">{score as number}</div>
                   <div className="text-xs text-gray-400">{competency.replace('Competência ', 'C')}</div>
@@ -132,7 +132,7 @@ export default function ResultadosPage() {
             <Brain size={24} className="text-purple-400" />
             <h2 className="text-white text-xl font-semibold">Resumo da Análise</h2>
           </div>
-          <p className="text-gray-300 leading-relaxed">{result.feedback.summary}</p>
+          <p className="text-gray-300 leading-relaxed">{result.feedback?.summary || 'Resumo não disponível'}</p>
         </div>
 
         {/* Congratulations Banner */}
@@ -142,7 +142,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Pontos Positivos</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-            {result.feedback.congratulations.map((item: string, index: number) => (
+            {result.feedback?.congratulations?.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <CheckCircle size={16} className="text-green-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -158,7 +158,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Sugestões de Melhoria</h2>
           </div>
           <div className="space-y-3">
-            {result.feedback.improvements.map((item: string, index: number) => (
+            {result.feedback?.improvements?.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <Lightbulb size={16} className="text-blue-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -174,7 +174,7 @@ export default function ResultadosPage() {
             <h2 className="text-white font-semibold text-lg">Pontos de Atenção</h2>
           </div>
           <div className="space-y-3">
-            {result.feedback.attention.map((item: string, index: number) => (
+            {result.feedback?.attention?.map((item: string, index: number) => (
               <div key={index} className="flex items-start gap-3 text-white">
                 <Target size={16} className="text-yellow-400 mt-1 flex-shrink-0" />
                 <span className="text-sm">{item}</span>
@@ -187,7 +187,7 @@ export default function ResultadosPage() {
         <div className="mb-8">
           <h2 className="text-white text-xl font-semibold mb-6">Análise Detalhada por Competência</h2>
           <div className="space-y-6">
-            {Object.entries(result.competencies).map(([competency, score]) => {
+            {result.competencies && Object.entries(result.competencies).map(([competency, score]) => {
               const getScoreColor = (score: number) => {
                 if (score >= 160) return 'text-green-400';
                 if (score >= 120) return 'text-blue-400';
@@ -231,7 +231,7 @@ export default function ResultadosPage() {
                   </div>
                   
                   <p className="text-gray-300 text-sm leading-relaxed">
-                    {result.feedback.competencyFeedback[competency] || 
+                    {result.feedback?.competencyFeedback?.[competency] || 
                      `Pontuação: ${score} pontos. ${competency === 'Competência I' ? 'Avalia o domínio da modalidade escrita formal da língua portuguesa.' : 
                      competency === 'Competência II' ? 'Avalia a compreensão do tema e aplicação de conceitos.' :
                      competency === 'Competência III' ? 'Avalia a capacidade de argumentação e organização de ideias.' :
@@ -251,8 +251,8 @@ export default function ResultadosPage() {
           </div>
                      <div className="bg-gray-800/20 rounded-2xl p-4 border border-gray-700/50 backdrop-blur-sm">
             <p className="text-gray-300 text-sm leading-relaxed">
-              {result.originalEssay}
-              {result.originalEssay.length > 200 && '...'}
+              {result.originalEssay || 'Redação não disponível'}
+              {(result.originalEssay?.length || 0) > 200 && '...'}
             </p>
           </div>
         </div>
