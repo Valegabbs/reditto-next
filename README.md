@@ -1,4 +1,4 @@
-# Redigitto - Correção de Redação para Todos!
+# Reditto - Correção de Redação para Todos!
 
 Uma plataforma moderna de correção de redações utilizando IA, desenvolvida com Next.js e integração com OpenRouter.
 

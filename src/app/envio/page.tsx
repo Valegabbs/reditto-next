@@ -62,7 +62,7 @@ export default function EnvioPage() {
         {/* Header */}
         <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
           <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-            <Image src="/logo reditto.png" alt="Redigitto Logo" width={20} height={20} className="w-5 h-5" />
+            <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
             <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
           </div>
           <div className="flex items-center gap-3">

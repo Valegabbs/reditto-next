@@ -62,7 +62,7 @@ export default function HomePage() {
           <div className="flex justify-center mb-4">
             <Image
               src="/logo reditto.png"
-              alt="Redigitto Logo"
+              alt="Reditto Logo"
               width={80}
               height={80}
               className="w-20 h-20"

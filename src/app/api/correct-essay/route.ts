@@ -27,8 +27,8 @@ async function extractTextFromImage(imageBuffer: Buffer): Promise<string> {
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://redigitto.com',
-        'X-Title': 'Redigitto OCR'
+        'HTTP-Referer': 'https://reditto.com',
+        'X-Title': 'Reditto OCR'
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o',
@@ -114,8 +114,8 @@ Retorne apenas o JSON válido, sem texto adicional.
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://redigitto.com',
-        'X-Title': 'Redigitto Essay Analysis'
+        'HTTP-Referer': 'https://reditto.com',
+        'X-Title': 'Reditto Essay Analysis'
       },
       body: JSON.stringify({
         model: 'openai/gpt-4o',

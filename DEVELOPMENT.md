@@ -1,4 +1,4 @@
-# Redigitto - Configuração de Desenvolvimento
+# Reditto - Configuração de Desenvolvimento
 
 ## Scripts Disponíveis
 
