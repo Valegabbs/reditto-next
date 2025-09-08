@@ -110,7 +110,7 @@ export default function EnvioPage() {
               )}
               {!isConfigured && (
                 <p className="text-yellow-400 text-sm mt-2">
-                  ⚠️ Modo visitante: funcionalidades de histórico serão adicionadas no roadmap.
+                  ⚠️ Modo visitante: crie uma conta para poder ter acesso ao seu histórico de redações e evoluções
                 </p>
               )}
             </div>

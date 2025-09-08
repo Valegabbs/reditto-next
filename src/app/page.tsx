@@ -13,11 +13,20 @@ export default function HomePage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: 'error' | 'success' | 'info'; message: string } | null>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     name: ''
   });
+
+  const showToast = (message: string, type: 'error' | 'success' | 'info' = 'error') => {
+    setToast({ type, message });
+    try {
+      window.clearTimeout((window as any).__reditto_toast_timer);
+    } catch {}
+    (window as any).__reditto_toast_timer = window.setTimeout(() => setToast(null), 4000);
+  };
 
   const handleThemeToggle = () => {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -55,7 +64,7 @@ export default function HomePage() {
       }
 
       if (result.error) {
-        alert(`Erro: ${result.error.message || 'Tente novamente.'}`);
+        showToast(`Erro: ${result.error.message || 'Tente novamente.'}`, 'error');
         setIsSubmitting(false);
         return;
       }
@@ -86,7 +95,7 @@ export default function HomePage() {
       
     } catch (error) {
       console.error('Erro no formulário:', error);
-      alert('Erro inesperado. Tente novamente.');
+      showToast('Erro inesperado. Tente novamente.', 'error');
       setIsSubmitting(false);
     }
   };
@@ -114,6 +123,20 @@ export default function HomePage() {
   return (
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
+        {/* Toast */}
+        {toast && (
+          <div className="fixed top-4 right-4 z-50">
+            <div className={`px-4 py-3 rounded-lg shadow-lg border backdrop-blur-sm ${
+              toast.type === 'error' ? 'bg-red-900/30 border-red-500/40 text-red-200' : toast.type === 'success' ? 'bg-green-900/30 border-green-500/40 text-green-200' : 'bg-yellow-900/30 border-yellow-500/40 text-yellow-200'
+            }`}>
+              <div className="flex items-start gap-3">
+                <span className="font-medium">{toast.type === 'error' ? 'Aviso' : toast.type === 'success' ? 'Sucesso' : 'Informação'}</span>
+                <button onClick={() => setToast(null)} className="ml-auto text-white/70 hover:text-white">✕</button>
+              </div>
+              <div className="text-sm mt-1">{toast.message}</div>
+            </div>
+          </div>
+        )}
         {/* Header */}
         <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
           <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
@@ -174,6 +197,9 @@ export default function HomePage() {
                 <h3 className="text-white font-medium mb-1 text-center">Testar sem cadastro</h3>
                 <p className="text-gray-300 text-sm mb-3 text-center">
                   Experimente todas as funcionalidades
+                </p>
+                <p className="text-yellow-400 text-xs mb-3 text-center">
+                  ⚠️ Modo visitante: crie uma conta para poder ter acesso ao seu histórico de redações e evoluções
                 </p>
                 <button
                   onClick={handleGuestAccess}
