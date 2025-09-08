@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function ResultadosPage() {
   const [result, setResult] = useState<any>(null);
+  const { signOut } = useAuth();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -75,6 +77,11 @@ export default function ResultadosPage() {
     window.print();
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = '/';
+  };
+
   if (!result) {
     return (
       <ClientWrapper>
@@ -89,8 +96,39 @@ export default function ResultadosPage() {
   }
 
   return (
-    <ClientWrapper>
-      <div className="min-h-screen bg-background pt-16">
+    <ClientWrapper showFloatingMenu={false}>
+      <div className="min-h-screen bg-background">
+
+      {/* Header (copiado da página de envio) */}
+      <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+          <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+          <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={() => {
+              const current = document.documentElement.getAttribute('data-theme') || 'dark';
+              const next = current === 'dark' ? 'light' : 'dark';
+              document.documentElement.setAttribute('data-theme', next);
+              try { localStorage.setItem('reditto-theme', next); } catch {}
+            }} 
+            className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
+            aria-label="Alternar tema"
+          >
+            <Sun size={20} />
+          </button>
+          <button 
+            onClick={handleSignOut} 
+            className="header-text text-white hover:text-red-400 transition-colors flex items-center gap-1 text-sm"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
+            </svg>
+            Sair
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto p-6">
