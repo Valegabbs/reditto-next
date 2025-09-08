@@ -98,15 +98,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     try {
-      console.log('🔄 Tentando criar conta para:', email);
-      console.log('📝 Dados do cadastro:', { email, name, passwordLength: password.length });
+      const sanitizedEmail = (email || '').trim().toLowerCase();
+      const sanitizedName = (name || '').trim();
+      const sanitizedPassword = (password || '').trim();
+
+      // Boas práticas: validar antes de enviar à API
+      if (!sanitizedEmail || !sanitizedPassword) {
+        return { error: { message: 'Informe email e senha.' } };
+      }
+      if (sanitizedPassword.length < 8) {
+        return { error: { message: 'A senha deve ter pelo menos 8 caracteres.' } };
+      }
+
+      console.log('🔄 Tentando criar conta para:', sanitizedEmail);
+      console.log('📝 Dados do cadastro:', { email: sanitizedEmail, name: sanitizedName, passwordLength: sanitizedPassword.length });
       
+      // Conforme documentação Supabase JS v2: usar signUp({ email, password, options })
+      const appUrl = (process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '');
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: sanitizedEmail,
+        password: sanitizedPassword,
         options: {
+          // URL para redireciono de confirmação de email (se email confirmation estiver ativo)
+          emailRedirectTo: appUrl ? `${appUrl}/envio` : undefined,
+          // user_metadata
           data: {
-            name: name || email.split('@')[0]
+            full_name: sanitizedName || sanitizedEmail.split('@')[0]
           }
         }
       });

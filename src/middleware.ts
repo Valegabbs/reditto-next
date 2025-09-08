@@ -85,17 +85,22 @@ export function middleware(request: NextRequest) {
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   
   // CSP (Content Security Policy) básico
+  const supabaseProjectUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://imrqgircligznruvudpf.supabase.co'
+  const supabaseDomain = new URL(supabaseProjectUrl).origin
+
   response.headers.set(
     'Content-Security-Policy',
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "img-src 'self' data: blob:; " +
-    "font-src 'self'; " +
-    "connect-src 'self'; " +
-    "media-src 'none'; " +
-    "object-src 'none'; " +
-    "base-uri 'self';"
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob:",
+      "font-src 'self'",
+      `connect-src 'self' ${supabaseDomain} ${supabaseDomain.replace('.supabase.co','.supabase.in')} wss://${new URL(supabaseProjectUrl).host} https://${new URL(supabaseProjectUrl).host}`,
+      "media-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'"
+    ].join('; ')
   );
   
   return response;
