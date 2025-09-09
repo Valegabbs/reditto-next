@@ -5,11 +5,13 @@ import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 type SubmissionType = 'text' | 'image';
 
 export default function EnvioPage() {
   const { user, signOut, isConfigured } = useAuth();
+  const router = useRouter();
   const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
   const [topic, setTopic] = useState('');
   const [essayText, setEssayText] = useState('');
@@ -83,7 +85,7 @@ export default function EnvioPage() {
               <div className="space-y-3 w-full">
               <button
                 type="button"
-                onClick={() => setActiveMenu('historico')}
+                onClick={() => { setActiveMenu('historico'); router.push('/historico'); }}
                 className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
                   activeMenu === 'historico'
                     ? 'sidebar-button-active'
