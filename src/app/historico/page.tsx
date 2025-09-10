@@ -144,11 +144,11 @@ export default function HistoricoPage() {
                     </div>
                     
                     <div className="mt-4 md:mt-0 md:ml-6 flex flex-col items-center justify-center">
-                      <div className="relative">
+                      <div className="flex items-baseline gap-1">
                         <div className="text-4xl font-bold text-purple-400">{essay.final_score}</div>
-                        <div className="text-xs text-gray-400 absolute -right-4 top-0">/ 1000</div>
+                        <div className="text-xs text-gray-400">/ 1000</div>
                       </div>
-                      <div className="flex items-center mt-3">
+                      <div className="flex items-center mt-3 -ml-2">
                         <Award size={16} className="text-yellow-500 mr-1" />
                         <span className="text-sm text-gray-300">
                           {essay.final_score >= 900 ? "Excelente" :

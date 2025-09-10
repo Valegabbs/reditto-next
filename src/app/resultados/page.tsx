@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, Save, History } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, Save, History, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 export default function ResultadosPage() {
+  const router = useRouter();
   const [result, setResult] = useState<any>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -138,6 +140,15 @@ export default function ResultadosPage() {
   return (
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
+
+      {/* Botão de Retorno - Posição Fixa */}
+      <button
+        onClick={() => router.push('/envio')}
+        className="fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
+        aria-label="Voltar para início"
+      >
+        <ChevronLeft size={20} />
+      </button>
 
       {/* Header (copiado da página de envio) */}
       <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
