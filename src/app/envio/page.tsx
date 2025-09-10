@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, History, TrendingUp, Star, ChevronLeft } from 'lucide-react';
+import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, History, TrendingUp, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +17,7 @@ export default function EnvioPage() {
   const [essayText, setEssayText] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<'historico' | 'evolucao' | 'favoritos'>('historico');
+  const [activeMenu, setActiveMenu] = useState<'historico' | 'evolucao'>('historico');
   const [sidebarCollapsed] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,19 +109,7 @@ export default function EnvioPage() {
                 <TrendingUp size={18} />
                 {!sidebarCollapsed && <span>Evolução</span>}
               </button>
-              <button
-                type="button"
-                onClick={() => setActiveMenu('favoritos')}
-                className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
-                  activeMenu === 'favoritos'
-                    ? 'sidebar-button-active'
-                    : 'sidebar-button-inactive'
-                } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                title={sidebarCollapsed ? 'Favoritos' : ''}
-              >
-                <Star size={18} />
-                {!sidebarCollapsed && <span>Favoritos</span>}
-              </button>
+              
               </div>
             </div>
           </aside>
