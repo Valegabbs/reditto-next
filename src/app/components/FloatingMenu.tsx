@@ -2,7 +2,8 @@
 
 import Image from 'next/image';
 import React from 'react';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, History } from 'lucide-react';
+import Link from 'next/link';
 
 export default function FloatingMenu({ onLogout }: { onLogout?: () => void }) {
   const [theme, setTheme] = React.useState<string>('dark');
@@ -31,21 +32,26 @@ export default function FloatingMenu({ onLogout }: { onLogout?: () => void }) {
         <Image src="/logo reditto.png" alt="Reditto Logo" width={28} height={28} />
         <span className="font-semibold">Correção de Redação para Todos!</span>
       </div>
-      <button 
-        onClick={toggleTheme} 
-        className="p-2 rounded-full bg-blue-500/20 hover:bg-blue-500/30 transition-colors border border-blue-400/50"
-        aria-label="Alternar tema"
-      >
-        {theme === 'dark' ? <Sun size={16} className="text-blue-300" /> : <Moon size={16} className="text-blue-600" />}
-      </button>
-      {onLogout && (
+      <div className="flex items-center gap-2">
+        <Link href="/historico" className="p-2 rounded-full bg-purple-500/20 hover:bg-purple-500/30 transition-colors border border-purple-400/50 flex items-center justify-center" aria-label="Histórico de redações">
+          <History size={16} className="text-purple-300" />
+        </Link>
         <button 
-          onClick={onLogout} 
-          className="text-white/90 hover:text-white transition-colors px-3 py-1 rounded-full hover:bg-white/10"
+          onClick={toggleTheme} 
+          className="p-2 rounded-full bg-blue-500/20 hover:bg-blue-500/30 transition-colors border border-blue-400/50"
+          aria-label="Alternar tema"
         >
-          Sair
+          {theme === 'dark' ? <Sun size={16} className="text-blue-300" /> : <Moon size={16} className="text-blue-600" />}
         </button>
-      )}
+        {onLogout && (
+          <button 
+            onClick={onLogout} 
+            className="text-white/90 hover:text-white transition-colors px-3 py-1 rounded-full hover:bg-white/10"
+          >
+            Sair
+          </button>
+        )}
+      </div>
     </div>
   );
 }

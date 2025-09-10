@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, History, TrendingUp, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, History, TrendingUp, Star, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +18,7 @@ export default function EnvioPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState<'historico' | 'evolucao' | 'favoritos'>('historico');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,13 +68,13 @@ export default function EnvioPage() {
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
         <div className="flex">
-          {/* Toggle Button - Fixed Position */}
+          {/* Botão de Retorno - Posição Fixa */}
           <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            onClick={() => router.push('/')}
             className="fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
-            aria-label={sidebarCollapsed ? 'Expandir sidebar' : 'Contrair sidebar'}
+            aria-label="Voltar"
           >
-            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+            <ChevronLeft size={20} />
           </button>
 
           {/* Sidebar */}

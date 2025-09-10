@@ -1,14 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, Save, History } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export default function ResultadosPage() {
   const [result, setResult] = useState<any>(null);
-  const { signOut } = useAuth();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [topic, setTopic] = useState('');
+  const { user, signOut } = useAuth();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -80,6 +84,42 @@ export default function ResultadosPage() {
   const handleSignOut = async () => {
     await signOut();
     window.location.href = '/';
+  };
+  
+  const handleViewHistory = () => {
+    window.location.href = '/historico';
+  };
+  
+  const handleSaveToHistory = async () => {
+    if (!user || !result) return;
+    
+    try {
+      setIsSaving(true);
+      
+      const essayData = {
+        user_id: user.id,
+        topic: topic || 'Redação sem tema específico',
+        essay_text: result.originalEssay,
+        final_score: result.finalScore,
+        competencies: result.competencies,
+        feedback: result.feedback
+      };
+      
+      const { data, error } = await supabase
+        .from('essays')
+        .insert(essayData)
+        .select();
+        
+      if (error) throw error;
+      
+      setIsSaved(true);
+      console.log('Redação salva com sucesso:', data);
+    } catch (err) {
+      console.error('Erro ao salvar redação:', err);
+      alert('Erro ao salvar redação no histórico. Tente novamente.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!result) {
@@ -296,7 +336,7 @@ export default function ResultadosPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
           <button
             onClick={handleNewEssay}
             className="btn-primary"
@@ -311,7 +351,57 @@ export default function ResultadosPage() {
             <Printer size={20} />
             Imprimir Resultado
           </button>
+          {user && (
+            <>
+              <button
+                onClick={handleSaveToHistory}
+                disabled={isSaving || isSaved}
+                className={`btn-secondary ${isSaved ? 'bg-green-600 hover:bg-green-700' : ''}`}
+              >
+                {isSaving ? (
+                  <>
+                    <span className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></span>
+                    Salvando...
+                  </>
+                ) : isSaved ? (
+                  <>
+                    <CheckCircle size={20} />
+                    Salvo no Histórico
+                  </>
+                ) : (
+                  <>
+                    <Save size={20} />
+                    Salvar no Histórico
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleViewHistory}
+                className="btn-secondary"
+              >
+                <History size={20} />
+                Ver Histórico
+              </button>
+            </>
+          )}
         </div>
+        
+        {/* Topic Input for Saving */}
+        {user && !isSaved && (
+          <div className="mt-6 max-w-md mx-auto">
+            <label htmlFor="topic" className="block text-sm font-medium text-gray-300 mb-1">
+              Tema da Redação (opcional para salvar no histórico)
+            </label>
+            <input
+              type="text"
+              id="topic"
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              placeholder="Ex: Intolerância religiosa no Brasil"
+              className="w-full px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+            />
+          </div>
+        )}
       </main>
       </div>
     </ClientWrapper>
