@@ -126,6 +126,10 @@ export default function HistoricoPage() {
             <div className="p-6 rounded-2xl border border-red-500/30 bg-red-900/20 backdrop-blur-sm">
               <p className="text-red-300">{error}</p>
             </div>
+          ) : !user ? (
+            <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
+              <p className="text-gray-300">Faça login para visualizar seu histórico.</p>
+            </div>
           ) : essays.length === 0 ? (
             <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
               <p className="text-gray-300">Você ainda não possui redações corrigidas. Envie sua primeira redação para começar!</p>
