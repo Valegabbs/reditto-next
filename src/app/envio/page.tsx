@@ -155,7 +155,7 @@ export default function EnvioPage() {
                 Digite o tema e o texto ou envie uma foto da sua redação
               </p>
               {user && (
-                <p className="mt-2 text-sm text-purple-400">
+                <p className="mt-2 text-base text-purple-400">
                   Olá, {user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto.
                 </p>
               )}
