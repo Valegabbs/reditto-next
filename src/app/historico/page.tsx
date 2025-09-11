@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import ClientWrapper from '../components/ClientWrapper';
-import { ChevronLeft, FileText, Calendar, Award, ArrowRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, FileText, Calendar, Award, ArrowRight, Loader2, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ export default function HistoricoPage() {
   const [essays, setEssays] = useState<EssayHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEssayHistory() {
@@ -75,6 +76,28 @@ export default function HistoricoPage() {
     
     // Redirecionar para a página de resultados com os dados
     router.push(`/resultados?data=${encodeURIComponent(JSON.stringify(resultData))}`);
+  };
+
+  const deleteEssay = async (essayId: string) => {
+    if (!user) return;
+    const confirmed = window.confirm('Deseja realmente excluir esta redação? Esta ação não pode ser desfeita.');
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(essayId);
+      // Excluir pontuações relacionadas (defensivo, caso exista tabela dependente com RLS)
+      await supabase.from('essay_scores').delete().eq('user_id', user.id).eq('essay_id', essayId);
+      // Excluir a redação
+      const { error } = await supabase.from('essays').delete().eq('user_id', user.id).eq('id', essayId);
+      if (error) throw error;
+      // Atualizar estado local
+      setEssays((prev) => prev.filter((e) => e.id !== essayId));
+    } catch (err: any) {
+      console.error('Erro ao excluir redação:', err);
+      alert(err?.message || 'Não foi possível excluir a redação.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -158,9 +181,25 @@ export default function HistoricoPage() {
                            essay.final_score >= 400 ? "Insuficiente" : "Precário"}
                         </span>
                       </div>
-                      <div className="mt-4 flex items-center text-purple-400 text-sm">
-                        <span>Ver detalhes</span>
-                        <ArrowRight size={16} className="ml-1" />
+                      <div className="mt-4 flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); viewEssayDetails(essay); }}
+                          className="flex items-center text-purple-400 text-sm hover:text-purple-300"
+                        >
+                          <span>Ver detalhes</span>
+                          <ArrowRight size={16} className="ml-1" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); deleteEssay(essay.id); }}
+                          className="flex items-center text-red-400 text-sm hover:text-red-300"
+                          disabled={deletingId === essay.id}
+                          aria-label="Excluir redação"
+                        >
+                          <Trash2 size={16} className="mr-1" />
+                          {deletingId === essay.id ? 'Excluindo...' : 'Excluir redação'}
+                        </button>
                       </div>
                     </div>
                   </div>

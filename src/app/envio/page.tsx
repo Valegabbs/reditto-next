@@ -98,7 +98,7 @@ export default function EnvioPage() {
               </button>
               <button
                 type="button"
-                onClick={() => setActiveMenu('evolucao')}
+                onClick={() => { setActiveMenu('evolucao'); router.push('/evolucao'); }}
                 className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
                   activeMenu === 'evolucao'
                     ? 'sidebar-button-active'
