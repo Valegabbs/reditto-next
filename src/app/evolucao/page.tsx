@@ -11,6 +11,7 @@ type EssayPoint = {
   id: string;
   created_at: string;
   final_score: number;
+  topic: string | null;
 };
 
 export default function EvolucaoPage() {
@@ -45,7 +46,7 @@ export default function EvolucaoPage() {
         setLoading(true);
         const { data, error } = await supabase
           .from('essays')
-          .select('id, created_at, final_score')
+          .select('id, created_at, final_score, topic')
           .eq('user_id', user.id)
           .order('created_at', { ascending: true });
 
@@ -93,7 +94,7 @@ export default function EvolucaoPage() {
     const circles = points.map((p) => {
       const x = xScale(new Date(p.created_at).getTime());
       const y = yScale(p.final_score);
-      return { x, y, id: p.id, label: p.final_score };
+      return { x, y, id: p.id, label: p.final_score, topic: p.topic };
     });
 
     const formatter = new Intl.DateTimeFormat('pt-BR', { month: 'short', day: '2-digit' });
@@ -107,6 +108,7 @@ export default function EvolucaoPage() {
   }, [points, containerWidth]);
 
   const isAuthenticated = Boolean(user);
+  const [hover, setHover] = useState<{ x: number; y: number; text: string } | null>(null);
 
   return (
     <ClientWrapper showFloatingMenu={false}>
@@ -119,70 +121,89 @@ export default function EvolucaoPage() {
           <ChevronLeft size={20} />
         </button>
 
-        <div className="max-w-5xl px-6 py-8 mx-auto">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+        <div className="px-6 py-8 mx-auto max-w-5xl">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="flex gap-2 items-center text-3xl font-bold text-white">
               <TrendingUp size={24} className="text-purple-400" />
               Evolução das suas redações
             </h1>
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center p-12">
-              <Loader2 size={32} className="animate-spin text-purple-500" />
+            <div className="flex justify-center items-center p-12">
+              <Loader2 size={32} className="text-purple-500 animate-spin" />
               <span className="ml-2 text-gray-300">Carregando evolução...</span>
             </div>
           ) : error ? (
-            <div className="p-6 rounded-2xl border border-red-500/30 bg-red-900/20 backdrop-blur-sm">
+            <div className="p-6 rounded-2xl border backdrop-blur-sm border-red-500/30 bg-red-900/20">
               <p className="text-red-300">{error}</p>
             </div>
           ) : !isAuthenticated ? (
-            <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
+            <div className="p-6 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
               <p className="text-gray-300">Faça login para visualizar sua evolução.</p>
             </div>
           ) : !points.length ? (
-            <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
+            <div className="p-6 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
               <p className="text-gray-300">Você ainda não possui correções para exibir. Envie sua primeira redação!</p>
             </div>
           ) : (
             <div className="space-y-4">
-              <div ref={containerRef} className="p-4 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
+              <div ref={containerRef} className="p-4 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
                 {chart && (
-                  <svg width={chart.width} height={320} role="img" aria-label="Gráfico de evolução de notas">
-                    <desc>Notas finais por data de envio</desc>
-                    {/* Eixos */}
-                    <line x1={chart.margin.left} y1={320 - chart.margin.bottom} x2={chart.width - chart.margin.right} y2={320 - chart.margin.bottom} stroke="#4b5563" strokeOpacity="0.5" />
-                    <line x1={chart.margin.left} y1={chart.margin.top} x2={chart.margin.left} y2={320 - chart.margin.bottom} stroke="#4b5563" strokeOpacity="0.5" />
+                  <div className="relative" style={{ width: chart.width, height: 320 }}>
+                    <svg width={chart.width} height={320} role="img" aria-label="Gráfico de evolução de notas" className="absolute inset-0">
+                      <desc>Notas finais por data de envio</desc>
+                      {/* Eixos */}
+                      <line x1={chart.margin.left} y1={320 - chart.margin.bottom} x2={chart.width - chart.margin.right} y2={320 - chart.margin.bottom} stroke="#4b5563" strokeOpacity="0.5" />
+                      <line x1={chart.margin.left} y1={chart.margin.top} x2={chart.margin.left} y2={320 - chart.margin.bottom} stroke="#4b5563" strokeOpacity="0.5" />
 
-                    {/* Grid horizontal (a cada 200 pts) */}
-                    {[0, 200, 400, 600, 800, 1000].map((s) => {
-                      const y = chart.margin.top + (320 - chart.margin.top - chart.margin.bottom) - (s / 1000) * (320 - chart.margin.top - chart.margin.bottom);
-                      return (
-                        <g key={s}>
-                          <line x1={chart.margin.left} y1={y} x2={chart.width - chart.margin.right} y2={y} stroke="#374151" strokeDasharray="4 4" />
-                          <text x={chart.margin.left - 10} y={y + 4} textAnchor="end" className="fill-gray-400 text-xs">{s}</text>
+                      {/* Grid horizontal (a cada 200 pts) */}
+                      {[0, 200, 400, 600, 800, 1000].map((s) => {
+                        const y = chart.margin.top + (320 - chart.margin.top - chart.margin.bottom) - (s / 1000) * (320 - chart.margin.top - chart.margin.bottom);
+                        return (
+                          <g key={s}>
+                            <line x1={chart.margin.left} y1={y} x2={chart.width - chart.margin.right} y2={y} stroke="#374151" strokeDasharray="4 4" />
+                            <text x={chart.margin.left - 10} y={y + 4} textAnchor="end" className="text-xs fill-gray-400">{s}</text>
+                          </g>
+                        );
+                      })}
+
+                      {/* Linha */}
+                      <path d={chart.pathD} fill="none" stroke="#14b8a6" strokeWidth={3} strokeLinecap="round" />
+
+                      {/* Pontos */}
+                      {chart.circles.map((c) => (
+                        <g
+                          key={c.id}
+                          className="cursor-pointer"
+                          onMouseEnter={() => setHover({ x: c.x, y: c.y, text: c.topic || 'Tema não informado' })}
+                          onMouseLeave={() => setHover(null)}
+                          onMouseMove={() => setHover((prev) => (prev ? { ...prev, x: c.x, y: c.y } : prev))}
+                          onClick={() => router.push(`/historico?essayId=${c.id}`)}
+                        >
+                          <circle cx={c.x} cy={c.y} r={6} fill="#f87171" />
+                          <text x={c.x} y={c.y - 12} textAnchor="middle" className="fill-gray-300 text-[10px]">{c.label}</text>
                         </g>
-                      );
-                    })}
+                      ))}
 
-                    {/* Linha */}
-                    <path d={chart.pathD} fill="none" stroke="#14b8a6" strokeWidth={3} strokeLinecap="round" />
+                      {/* Ticks de data */}
+                      {chart.ticks.map((t, i) => (
+                        <text key={i} x={t.x} y={320 - chart.margin.bottom + 16} textAnchor="middle" className="text-xs fill-gray-400">
+                          {t.label}
+                        </text>
+                      ))}
+                    </svg>
 
-                    {/* Pontos */}
-                    {chart.circles.map((c) => (
-                      <g key={c.id}>
-                        <circle cx={c.x} cy={c.y} r={5} fill="#f87171" />
-                        <text x={c.x} y={c.y - 10} textAnchor="middle" className="fill-gray-300 text-[10px]">{c.label}</text>
-                      </g>
-                    ))}
-
-                    {/* Ticks de data */}
-                    {chart.ticks.map((t, i) => (
-                      <text key={i} x={t.x} y={320 - chart.margin.bottom + 16} textAnchor="middle" className="fill-gray-400 text-xs">
-                        {t.label}
-                      </text>
-                    ))}
-                  </svg>
+                    {hover && (
+                      <div
+                        className="absolute z-10 px-2 py-1 text-xs text-gray-100 rounded border border-gray-700 shadow-lg pointer-events-none bg-gray-900/90"
+                        style={{ left: Math.min(Math.max(hover.x + 8, 8), (chart.width || 0) - 160), top: Math.max(hover.y - 36, 8) }}
+                        role="tooltip"
+                      >
+                        {hover.text}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
 

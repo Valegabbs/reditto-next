@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import ClientWrapper from '../components/ClientWrapper';
 import { ChevronLeft, FileText, Calendar, Award, ArrowRight, Loader2, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { EssayHistory } from '@/types';
@@ -16,6 +16,8 @@ export default function HistoricoPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+  const [highlightId, setHighlightId] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchEssayHistory() {
@@ -48,6 +50,22 @@ export default function HistoricoPage() {
 
     fetchEssayHistory();
   }, [user]);
+
+  // Scroll e destaque ao receber ?essayId=
+  useEffect(() => {
+    if (!essays || essays.length === 0) return;
+    const essayId = searchParams?.get('essayId');
+    if (!essayId) return;
+
+    const el = document.getElementById(`essay-${essayId}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setHighlightId(essayId);
+      // Remover destaque após alguns segundos
+      const t = setTimeout(() => setHighlightId(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [essays, searchParams]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -139,7 +157,10 @@ export default function HistoricoPage() {
               {essays.map((essay) => (
                 <div 
                   key={essay.id} 
-                  className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm hover:border-purple-500/50 transition-all cursor-pointer"
+                  id={`essay-${essay.id}`}
+                  className={`p-6 rounded-2xl border bg-gray-800/20 backdrop-blur-sm hover:border-purple-500/50 transition-all cursor-pointer ${
+                    highlightId === essay.id ? 'border-purple-500 ring-2 ring-purple-500' : 'border-gray-700/50'
+                  }`}
                   onClick={() => viewEssayDetails(essay)}
                 >
                   <div className="flex flex-col md:flex-row justify-between">
