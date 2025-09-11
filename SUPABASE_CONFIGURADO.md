@@ -128,3 +128,16 @@ npm run dev
 **Seu sistema Reditto agora tem histórico completo funcionando!** 🚀
 
 Basta configurar o `.env.local` e testar todas as funcionalidades!
+
+---
+
+## ✉️ Configuração de Email (SMTP)
+
+- Provedor: Gmail
+- Host: `smtp.gmail.com`
+- Porta: `587`
+- Remetente (From/Admin): `redittosuporte@gmail.com`
+- Nome do remetente: `Suporte Reditto`
+- Observação: Uso de App Password do Gmail com 2FA. Configuração aplicada via API em 2025-09-11.
+
+Para testar rapidamente, use no Dashboard: Authentication → Users → Invite user e verifique se o e-mail chega como "Suporte Reditto <redittosuporte@gmail.com>".
