@@ -1,24 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
+import sharp from 'sharp';
 
-// Configurações de segurança - API Key protegida no servidor
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+export const runtime = 'nodejs';
+
+// Configurações de segurança - Credenciais protegidas no servidor
+const OPEN_WEBUI_BASE_URL = process.env.OPEN_WEBUI_BASE_URL;
+const OPEN_WEBUI_API_KEY = process.env.OPEN_WEBUI_API_KEY;
+const OPEN_WEBUI_MODEL = process.env.OPEN_WEBUI_MODEL || 'gemma3:4b';
+const OPEN_WEBUI_JWT_TOKEN = process.env.OPEN_WEBUI_JWT_TOKEN;
+const OPEN_WEBUI_API_PATH = process.env.OPEN_WEBUI_API_PATH || '/api/chat/completions';
+const OPEN_WEBUI_DEBUG = process.env.OPEN_WEBUI_DEBUG === 'true';
 
 // Configurações de segurança para OCR
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
-// Validação adicional da API Key
-function validateApiKey(): boolean {
-  if (!OPENROUTER_API_KEY) return false;
-  if (OPENROUTER_API_KEY === 'your_openrouter_api_key_here') return false;
-  if (OPENROUTER_API_KEY.length < 20) return false;
-  if (!OPENROUTER_API_KEY.startsWith('sk-or-')) return false;
-  return true;
+// Validação das credenciais do Open WebUI
+function validateCredentials(): { valid: boolean; error?: string } {
+  if (!OPEN_WEBUI_BASE_URL) {
+    return { valid: false, error: 'OPEN_WEBUI_BASE_URL não configurada' };
+  }
+  
+  // API Key pode ser opcional dependendo do setup do Open WebUI
+  
+  return { valid: true };
 }
 
 async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: string): Promise<string> {
-  console.log('🔍 Iniciando extração de texto da imagem...');
+  console.log(`🔍 Iniciando extração de texto da imagem com ${OPEN_WEBUI_MODEL}...`);
   
   try {
     const base64Image = imageBuffer.toString('base64');
@@ -28,20 +37,23 @@ async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: stri
     // Normalizar tipos MIME
     if (mimeType === 'image/jpg') mimeType = 'image/jpeg';
     
-    console.log('📝 Enviando requisição para OpenRouter (Gemini OCR)...');
+    console.log(`📝 Enviando requisição para Open WebUI (OCR - Modelo: ${OPEN_WEBUI_MODEL})...`);
+    console.log('📍 URL:', OPEN_WEBUI_BASE_URL);
+    console.log('🎯 Modelo:', OPEN_WEBUI_MODEL);
     console.log('🎯 Tipo MIME:', mimeType);
     console.log('📦 Tamanho da imagem (base64):', base64Image.length);
     
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    // Formato compatível com OpenAI API que o Open WebUI suporta
+    const response = await fetch(`${OPEN_WEBUI_BASE_URL}${OPEN_WEBUI_API_PATH}`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://reditto.com",
-        "X-Title": "Reditto - OCR de Redação",
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${OPEN_WEBUI_JWT_TOKEN || ''}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "Reditto-Next/1.0"
       },
       body: JSON.stringify({
-        "model": "google/gemini-2.0-flash-exp:free",
+        "model": OPEN_WEBUI_MODEL,
         "messages": [
           {
             "role": "user",
@@ -59,34 +71,33 @@ async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: stri
             ]
           }
         ],
-        "max_tokens": 3000,
-        "temperature": 0.1
+        "max_tokens": 4000,
+        "temperature": 0.1,
+        "stream": false
       })
     });
 
     console.log('📊 Status da resposta OCR:', response.status);
-
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorText = await response.text().catch(() => 'Erro desconhecido');
       console.error('❌ Erro na API de OCR:', {
         status: response.status,
         statusText: response.statusText,
-        error: errorData,
+        body: errorText,
         headers: Object.fromEntries(response.headers.entries())
       });
-      
-      // Mensagens de erro mais específicas
       let errorMessage = 'Erro na API de OCR';
-      if (response.status === 401) {
-        errorMessage = 'API Key inválida ou expirada';
+      if (response.status === 401 || response.status === 403) {
+        errorMessage = 'Credenciais inválidas para o Open WebUI';
+      } else if (response.status === 404 || response.status === 405) {
+        errorMessage = 'Endpoint não encontrado no Open WebUI';
       } else if (response.status === 429) {
         errorMessage = 'Muitas requisições. Tente novamente em alguns minutos';
       } else if (response.status === 400) {
-        errorMessage = `Erro na requisição: ${errorData.error?.message || 'Dados inválidos'}`;
+        errorMessage = `Erro na requisição: ${errorText}`;
       } else if (response.status >= 500) {
-        errorMessage = 'Servidor da OpenRouter temporariamente indisponível';
+        errorMessage = 'Servidor do Open WebUI temporariamente indisponível';
       }
-      
       throw new Error(`${errorMessage} (${response.status})`);
     }
 
@@ -95,7 +106,7 @@ async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: stri
     
     if (!data.choices || !data.choices[0] || !data.choices[0].message) {
       console.error('❌ Estrutura de resposta inválida:', data);
-      throw new Error('Resposta inválida da API de OCR');
+      throw new Error('Resposta inválida do Open WebUI');
     }
 
     const extractedText = data.choices[0].message.content;
@@ -111,19 +122,22 @@ async function extractTextFromImage(imageBuffer: Buffer, originalMimeType?: stri
 
 export async function POST(request: NextRequest) {
   console.log('🚀 === INICIANDO PROCESSAMENTO DE OCR ===');
-  console.log('🔑 API Key status:', OPENROUTER_API_KEY ? `Configurada (${OPENROUTER_API_KEY.substring(0, 20)}...)` : 'NÃO CONFIGURADA');
+  console.log('🔑 Credenciais status:', OPEN_WEBUI_API_KEY ? `API Key configurada (${OPEN_WEBUI_API_KEY.substring(0, 15)}...)` : 'API Key NÃO CONFIGURADA');
+  console.log('🔗 Base URL:', OPEN_WEBUI_BASE_URL || 'NÃO CONFIGURADA');
+  console.log('🎯 Modelo:', OPEN_WEBUI_MODEL || 'NÃO CONFIGURADO');
   
   try {
-    // Verificar se a API key está configurada e válida
-    if (!validateApiKey()) {
-      console.error('❌ API Key do OpenRouter inválida ou não configurada');
+    // Verificar se as credenciais estão configuradas e válidas
+    const credentialsCheck = validateCredentials();
+    if (!credentialsCheck.valid) {
+      console.error('❌ Credenciais do Open WebUI inválidas:', credentialsCheck.error);
       return NextResponse.json(
-        { error: 'API Key do OpenRouter não configurada. Configure OPENROUTER_API_KEY no arquivo .env.local' },
+        { error: `Configuração inválida: ${credentialsCheck.error}. Configure as variáveis OPEN_WEBUI_* no arquivo .env.local` },
         { status: 500 }
       );
     }
 
-    console.log('✅ API Key configurada');
+    console.log('✅ Credenciais validadas');
 
     // Adicionar headers de segurança
     const responseHeaders = {
@@ -169,7 +183,22 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('✅ Imagem validada, iniciando OCR...');
-    const imageBuffer = Buffer.from(await imageFile.arrayBuffer());
+    const originalArrayBuffer = await imageFile.arrayBuffer();
+    const originalBuffer: Buffer = Buffer.from(originalArrayBuffer as ArrayBuffer);
+
+    // Normalizar imagem para JPEG com largura máxima para reduzir payload
+    let imageBuffer: Buffer = originalBuffer as Buffer
+    try {
+      const normalized: Buffer = await sharp(originalBuffer as Buffer)
+        .rotate() // corrigir orientação
+        .resize({ width: 1400, withoutEnlargement: true })
+        .jpeg({ quality: 85 })
+        .toBuffer()
+      imageBuffer = normalized as Buffer
+      console.log('🗜️ Imagem normalizada para OCR. Tamanho:', imageBuffer.length)
+    } catch (e) {
+      console.warn('⚠️ Falha ao normalizar imagem. Seguindo com buffer original.')
+    }
     const extractedText = await extractTextFromImage(imageBuffer, imageFile.type);
     
     if (!extractedText || extractedText.trim().length < 50) {

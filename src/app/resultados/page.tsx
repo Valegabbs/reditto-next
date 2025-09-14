@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
+import Disclaimer from '../components/Disclaimer';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function ResultadosPage() {
@@ -313,6 +314,7 @@ export default function ResultadosPage() {
           </button>
         </div>
       </main>
+      <Disclaimer />
       </div>
     </ClientWrapper>
   );

@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, History, TrendingUp, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
+import Disclaimer from '../components/Disclaimer';
+import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
@@ -17,8 +19,7 @@ export default function EnvioPage() {
   const [essayText, setEssayText] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<'historico' | 'evolucao' | 'favoritos'>('historico');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -32,26 +33,32 @@ export default function EnvioPage() {
     setIsLoading(true);
 
     try {
-      // Preparar payload para página de processamento
+      // Processar inline sem página de processamento
+      let finalEssayText: string = ''
       if (submissionType === 'image' && selectedImage) {
-        // Converter imagem para Data URL para transportar entre páginas
-        const toDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = (err) => reject(err);
-          reader.readAsDataURL(file);
-        });
-
-        const dataUrl = await toDataUrl(selectedImage);
-        const job = { type: 'image' as const, topic, imageDataUrl: dataUrl };
-        sessionStorage.setItem('reditto-processing', JSON.stringify(job));
+        const ocrFormData = new FormData();
+        ocrFormData.append('image', selectedImage);
+        const ocrResponse = await fetch('/api/extract-text', { method: 'POST', body: ocrFormData });
+        if (!ocrResponse.ok) {
+          const errorData = await ocrResponse.json().catch(() => ({ error: 'Erro no OCR' }));
+          throw new Error(errorData.error || 'Falha ao extrair texto da imagem');
+        }
+        const ocrResult = await ocrResponse.json();
+        finalEssayText = ocrResult.extractedText as string;
       } else {
-        const job = { type: 'text' as const, topic, essayText };
-        sessionStorage.setItem('reditto-processing', JSON.stringify(job));
+        finalEssayText = essayText;
       }
 
-      // Ir para a tela de processamento
-      window.location.href = '/processando';
+      const correctionFormData = new FormData();
+      correctionFormData.append('topic', topic || '');
+      correctionFormData.append('essayText', finalEssayText || '');
+      const response = await fetch('/api/correct-essay', { method: 'POST', body: correctionFormData });
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
+        throw new Error(errorData.error || 'Falha ao processar a redação');
+      }
+      const result = await response.json();
+      window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
     } catch (error) {
       console.error('❌ Erro ao preparar envio:', error);
       alert(`Erro ao preparar o processamento: ${error instanceof Error ? error.message : 'Tente novamente.'}`);
@@ -68,63 +75,7 @@ export default function EnvioPage() {
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
         <div className="flex">
-          {/* Toggle Button - Fixed Position */}
-          <button
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
-            aria-label={sidebarCollapsed ? 'Expandir sidebar' : 'Contrair sidebar'}
-          >
-            {sidebarCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-          </button>
-
-          {/* Sidebar */}
-          <aside className={`border-r backdrop-blur-sm border-gray-700/50 bg-gray-800/10 transition-all duration-300 ${sidebarCollapsed ? 'p-2 w-16' : 'p-6 w-72'}`}>
-            <div className={`flex flex-col gap-4 mt-16 ${sidebarCollapsed ? 'items-center' : 'items-center'}`}>
-              
-              {/* Menu Buttons */}
-              <div className="space-y-3 w-full">
-              <button
-                type="button"
-                onClick={() => { setActiveMenu('historico'); router.push('/historico'); }}
-                className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
-                  activeMenu === 'historico'
-                    ? 'sidebar-button-active'
-                    : 'sidebar-button-inactive'
-                } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                title={sidebarCollapsed ? 'Histórico' : ''}
-              >
-                <History size={18} />
-                {!sidebarCollapsed && <span>Histórico</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveMenu('evolucao')}
-                className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
-                  activeMenu === 'evolucao'
-                    ? 'sidebar-button-active'
-                    : 'sidebar-button-inactive'
-                } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                title={sidebarCollapsed ? 'Evolução' : ''}
-              >
-                <TrendingUp size={18} />
-                {!sidebarCollapsed && <span>Evolução</span>}
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveMenu('favoritos')}
-                className={`w-full flex items-center gap-2 py-3 px-4 rounded-xl transition-all font-medium backdrop-blur-sm text-sm ${
-                  activeMenu === 'favoritos'
-                    ? 'sidebar-button-active'
-                    : 'sidebar-button-inactive'
-                } ${sidebarCollapsed ? 'justify-center' : ''}`}
-                title={sidebarCollapsed ? 'Favoritos' : ''}
-              >
-                <Star size={18} />
-                {!sidebarCollapsed && <span>Favoritos</span>}
-              </button>
-              </div>
-            </div>
-          </aside>
+          <Sidebar />
 
           {/* Main Content */}
           <div className="w-full">
@@ -337,6 +288,7 @@ export default function EnvioPage() {
               </div>
             </div>
           </main>
+          <Disclaimer />
           </div>
         </div>
       </div>

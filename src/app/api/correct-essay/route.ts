@@ -17,22 +17,28 @@ interface EssayResult {
   originalEssay: string;
 }
 
-// Configurações de segurança - API Key protegida no servidor
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
-const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
+// Configurações de segurança - Credenciais protegidas no servidor
+const OPEN_WEBUI_BASE_URL = process.env.OPEN_WEBUI_BASE_URL;
+const OPEN_WEBUI_API_KEY = process.env.OPEN_WEBUI_API_KEY;
+const OPEN_WEBUI_MODEL = process.env.OPEN_WEBUI_MODEL || 'gemma3:4b';
+const OPEN_WEBUI_JWT_TOKEN = process.env.OPEN_WEBUI_JWT_TOKEN;
+const OPEN_WEBUI_API_PATH = process.env.OPEN_WEBUI_API_PATH || '/api/chat/completions';
+const OPEN_WEBUI_DEBUG = process.env.OPEN_WEBUI_DEBUG === 'true';
 
 // Configurações de segurança
 const MAX_TEXT_LENGTH = 5000;
 const MIN_TEXT_LENGTH = 200;
 const MAX_TOPIC_LENGTH = 200;
 
-// Validação adicional da API Key
-function validateApiKey(): boolean {
-  if (!OPENROUTER_API_KEY) return false;
-  if (OPENROUTER_API_KEY === 'your_openrouter_api_key_here') return false;
-  if (OPENROUTER_API_KEY.length < 20) return false;
-  if (!OPENROUTER_API_KEY.startsWith('sk-or-')) return false;
-  return true;
+// Validação das credenciais do Open WebUI
+function validateCredentials(): { valid: boolean; error?: string } {
+  if (!OPEN_WEBUI_BASE_URL) {
+    return { valid: false, error: 'OPEN_WEBUI_BASE_URL não configurada' };
+  }
+  
+  // API Key e JWT podem ser opcionais dependendo do setup do Open WebUI.
+  
+  return { valid: true };
 }
 
 async function analyzeEssay(essayText: string, topic?: string): Promise<EssayResult> {
@@ -122,18 +128,20 @@ TAREFA: Analise cada competência detalhadamente e seja criterioso na pontuaçã
 
 LEMBRETE FINAL: Sua resposta deve ser APENAS o JSON válido, começando com { e terminando com }. Não inclua explicações, comentários ou formatação markdown.`;
 
-    console.log('📝 Enviando requisição para OpenRouter (DeepSeek Análise)...');
+    console.log('📝 Enviando requisição para Open WebUI (Gemma3 Análise)...');
+    console.log('📍 URL:', OPEN_WEBUI_BASE_URL);
+    console.log('🎯 Modelo:', OPEN_WEBUI_MODEL);
 
-    const response = await fetch(`${OPENROUTER_BASE_URL}/chat/completions`, {
+    const response = await fetch(`${OPEN_WEBUI_BASE_URL}${OPEN_WEBUI_API_PATH}`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
-        "HTTP-Referer": "https://reditto.com",
-        "X-Title": "Reditto - Correção de Redação",
-        "Content-Type": "application/json"
+        "Authorization": `Bearer ${OPEN_WEBUI_JWT_TOKEN || ''}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        "User-Agent": "Reditto-Next/1.0"
       },
       body: JSON.stringify({
-        "model": "deepseek/deepseek-r1-0528:free",
+        "model": OPEN_WEBUI_MODEL,
         "messages": [
           {
             "role": "user",
@@ -141,33 +149,32 @@ LEMBRETE FINAL: Sua resposta deve ser APENAS o JSON válido, começando com { e 
           }
         ],
         "max_tokens": 4000,
-        "temperature": 0.2
+        "temperature": 0.2,
+        "stream": false
       })
     });
 
     console.log('📊 Status da resposta Análise:', response.status);
-
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      const errorText = await response.text().catch(() => 'Erro desconhecido');
       console.error('❌ Erro na API de análise:', {
         status: response.status,
         statusText: response.statusText,
-        error: errorData,
+        body: errorText,
         headers: Object.fromEntries(response.headers.entries())
       });
-      
-      // Mensagens de erro mais específicas
       let errorMessage = 'Erro na API de análise';
-      if (response.status === 401) {
-        errorMessage = 'API Key inválida ou expirada';
+      if (response.status === 401 || response.status === 403) {
+        errorMessage = 'Credenciais inválidas para o Open WebUI';
+      } else if (response.status === 404 || response.status === 405) {
+        errorMessage = 'Endpoint não encontrado no Open WebUI';
       } else if (response.status === 429) {
         errorMessage = 'Muitas requisições. Tente novamente em alguns minutos';
       } else if (response.status === 400) {
-        errorMessage = `Erro na requisição: ${errorData.error?.message || 'Dados inválidos'}`;
+        errorMessage = `Erro na requisição: ${errorText}`;
       } else if (response.status >= 500) {
-        errorMessage = 'Servidor da OpenRouter temporariamente indisponível';
+        errorMessage = 'Servidor do Open WebUI temporariamente indisponível';
       }
-      
       throw new Error(`${errorMessage} (${response.status})`);
     }
 
@@ -229,19 +236,22 @@ LEMBRETE FINAL: Sua resposta deve ser APENAS o JSON válido, começando com { e 
 
 export async function POST(request: NextRequest) {
   console.log('🚀 === INICIANDO PROCESSAMENTO DE REDAÇÃO ===');
-  console.log('🔑 API Key status:', OPENROUTER_API_KEY ? `Configurada (${OPENROUTER_API_KEY.substring(0, 20)}...)` : 'NÃO CONFIGURADA');
+  console.log('🔑 Credenciais status:', OPEN_WEBUI_API_KEY ? `API Key configurada (${OPEN_WEBUI_API_KEY.substring(0, 15)}...)` : 'API Key NÃO CONFIGURADA');
+  console.log('🔗 Base URL:', OPEN_WEBUI_BASE_URL || 'NÃO CONFIGURADA');
+  console.log('🎯 Modelo:', OPEN_WEBUI_MODEL || 'NÃO CONFIGURADO');
   
   try {
-    // Verificar se a API key está configurada e válida
-    if (!validateApiKey()) {
-      console.error('❌ API Key do OpenRouter inválida ou não configurada');
+    // Verificar se as credenciais estão configuradas e válidas
+    const credentialsCheck = validateCredentials();
+    if (!credentialsCheck.valid) {
+      console.error('❌ Credenciais do Open WebUI inválidas:', credentialsCheck.error);
       return NextResponse.json(
-        { error: 'API Key do OpenRouter não configurada. Configure OPENROUTER_API_KEY no arquivo .env.local' },
+        { error: `Configuração inválida: ${credentialsCheck.error}. Configure as variáveis OPEN_WEBUI_* no arquivo .env.local` },
         { status: 500 }
       );
     }
 
-    console.log('✅ API Key configurada');
+    console.log('✅ Credenciais validadas');
 
     // Adicionar headers de segurança
     const responseHeaders = {

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Sun, Users, Mail, Eye, EyeOff, User } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from './components/ClientWrapper';
+import Disclaimer from './components/Disclaimer';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomePage() {
@@ -313,6 +314,7 @@ export default function HomePage() {
             </div>
           )}
         </main>
+        <Disclaimer />
       </div>
     </ClientWrapper>
   );

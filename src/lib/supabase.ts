@@ -1,20 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Verificar se as variáveis de ambiente estão configuradas
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://imrqgircligznruvudpf.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnFnaXJjbGlnem5ydXZ1ZHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTg2OTEsImV4cCI6MjA3MjY3NDY5MX0.O3VORx2CCGdvaQ04ACIme32Y1dlx5S2PjbudxaCNrUs'
+// Verificar se as variáveis de ambiente estão configuradas (sem defaults enganosos)
+const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+let supabaseUrl = ''
+try {
+  supabaseUrl = rawSupabaseUrl ? new URL(rawSupabaseUrl).toString() : ''
+} catch {
+  supabaseUrl = ''
+}
+
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
 console.log('🔍 Verificando configuração do Supabase:', {
   hasUrl: !!supabaseUrl,
   hasKey: !!supabaseAnonKey,
-  urlValue: supabaseUrl,
-  keyLength: supabaseAnonKey?.length
+  urlValue: supabaseUrl || '(vazio)',
+  keyLength: supabaseAnonKey ? String(supabaseAnonKey.length) : '0'
 })
 
 // Criar cliente Supabase
 export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co', 
-  supabaseAnonKey || 'placeholder-key', 
+  supabaseUrl || 'http://localhost', 
+  supabaseAnonKey || 'invalid', 
   {
     auth: {
       autoRefreshToken: true,
@@ -50,8 +57,14 @@ export const isSupabaseConfigured = () => {
   // Verificar se a URL é válida
   try {
     const url = new URL(supabaseUrl)
-    if (!url.hostname.includes('supabase.co')) {
+    if (!url.hostname.endsWith('.supabase.co')) {
       console.log('❌ URL do Supabase inválida:', supabaseUrl)
+      return false
+    }
+    // Verificar se a anon key tem formato JWT (3 partes)
+    const parts = supabaseAnonKey.split('.')
+    if (parts.length !== 3) {
+      console.log('❌ Anon Key inválida (formato não JWT)')
       return false
     }
     console.log('✅ Supabase configurado corretamente:', supabaseUrl)
