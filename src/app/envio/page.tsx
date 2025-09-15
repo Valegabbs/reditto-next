@@ -80,12 +80,13 @@ export default function EnvioPage() {
           {/* Main Content */}
           <div className="w-full">
           {/* Header */}
-          <div className="flex justify-between items-center p-6">
-            <div className="flex gap-3 items-center ml-4 header-item">
+          <div className="flex items-center p-6">
+            {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
+            <div className="hidden md:flex gap-3 items-center ml-4 header-item">
               <Image src="/logo reditto.png" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
               <span className="text-base font-medium header-text text-white/90">Correção de Redação para Todos!</span>
             </div>
-            <div className="flex gap-3 items-center">
+            <div className="ml-auto flex gap-3 items-center">
               <button 
                 onClick={() => {
                   const current = document.documentElement.getAttribute('data-theme') || 'dark';

@@ -142,6 +142,10 @@ body {
     @apply text-gray-700;
   }
 
+  /* Hamburger color per theme */
+  .hamburger-bars { background-color: #ffffff; }
+  [data-theme="light"] .hamburger-bars { background-color: #1f2937; }
+
   /* Light theme main form */
   [data-theme="light"] .main-form {
     background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(248,250,252,0.95) 100%);

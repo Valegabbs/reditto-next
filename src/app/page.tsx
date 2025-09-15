@@ -70,29 +70,8 @@ export default function HomePage() {
         return;
       }
 
-      // Aguardar um pouco para a autenticação ser processada
-      console.log('⏳ Aguardando autenticação...');
-      
-      // Aguardar até 5 segundos pela autenticação
-      let attempts = 0;
-      const maxAttempts = 50; // 5 segundos com verificações a cada 100ms
-      
-      const checkAuth = () => {
-        attempts++;
-        console.log(`Tentativa ${attempts}/${maxAttempts} - User: ${user ? 'Sim' : 'Não'}, Session: ${session ? 'Sim' : 'Não'}`);
-        
-        if (user && session) {
-          console.log('✅ Usuário autenticado, redirecionando...');
-          window.location.href = '/envio';
-        } else if (attempts >= maxAttempts) {
-          console.log('⚠️ Timeout na autenticação, mas redirecionando mesmo assim...');
-          window.location.href = '/envio';
-        } else {
-          setTimeout(checkAuth, 100);
-        }
-      };
-      
-      checkAuth();
+      // Redirecionar imediatamente; sessão será mantida pelo AuthContext
+      window.location.href = '/envio';
       
     } catch (error) {
       console.error('Erro no formulário:', error);
@@ -139,14 +118,15 @@ export default function HomePage() {
           </div>
         )}
         {/* Header */}
-        <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
-          <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+        <div className="flex items-center p-6 max-w-6xl mx-auto">
+          {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
+          <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
             <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
             <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
           </div>
           <button 
             onClick={handleThemeToggle} 
-            className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
+            className="ml-auto text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
             aria-label="Alternar tema"
           >
             <Sun size={20} />

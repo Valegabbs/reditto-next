@@ -9,6 +9,7 @@ export default function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [collapsed, setCollapsed] = React.useState(false)
+  const [isMobileOpen, setIsMobileOpen] = React.useState(false)
 
   const isActive = (href: string) => {
     if (href === '/envio') return pathname?.startsWith('/envio')
@@ -57,15 +58,43 @@ export default function Sidebar() {
 
   return (
     <>
+      {/* Desktop collapse toggle */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
+        className="hidden md:flex fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
         aria-label={collapsed ? 'Expandir sidebar' : 'Contrair sidebar'}
       >
         {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
       </button>
 
-      <aside className={`border-r backdrop-blur-sm border-gray-700/50 bg-gray-800/10 transition-all duration-300 ${
+      {/* Mobile hamburger */}
+      <button
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+        className="md:hidden fixed left-6 top-6 z-50 p-2 rounded-full transition-transform active:scale-95 header-text"
+        aria-label={isMobileOpen ? 'Fechar menu' : 'Abrir menu'}
+        aria-expanded={isMobileOpen}
+      >
+        {/* Animated hamburger (morphs to X) */}
+        <div
+          className={`w-5 h-0.5 hamburger-bars rounded-full mb-1 transition-transform duration-200 ease-out ${
+            isMobileOpen ? 'translate-y-1.5 rotate-45' : ''
+          }`}
+        />
+        <div
+          className={`w-5 h-0.5 hamburger-bars rounded-full mb-1 transition-all duration-200 ease-out ${
+            isMobileOpen ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'
+          }`}
+          style={{ transformOrigin: 'center' }}
+        />
+        <div
+          className={`w-5 h-0.5 hamburger-bars rounded-full transition-transform duration-200 ease-out ${
+            isMobileOpen ? '-translate-y-1.5 -rotate-45' : ''
+          }`}
+        />
+      </button>
+
+      {/* Desktop sidebar */}
+      <aside className={`hidden md:block border-r backdrop-blur-sm border-gray-700/50 bg-gray-800/10 transition-all duration-300 ${
         collapsed ? 'p-2 w-16' : 'p-6 w-72'
       }`}>
         <div className={`flex flex-col gap-4 mt-16 ${collapsed ? 'items-center' : 'items-center'}`}>
@@ -97,6 +126,21 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+
+      {/* Mobile drawer */}
+      {isMobileOpen && (
+        <div className="md:hidden fixed inset-0 z-40" aria-modal="true" role="dialog">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 p-6 border-r backdrop-blur-sm border-gray-700/50 bg-gray-900/90">
+            <div className="space-y-3 w-full mt-12">
+              <Button href="/envio" icon={<Home size={18} />} label="Início" title="Início" />
+              <Button href="/historico" icon={<History size={18} />} label="Histórico" title="Histórico" />
+              <Button href="/evolucao" icon={<TrendingUp size={18} />} label="Evolução" title="Evolução" />
+              <Button href="/favoritas" icon={<Star size={18} />} label="Favoritas" title="Favoritas" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {showVisitorNotice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-purple-950/60">

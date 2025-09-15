@@ -112,36 +112,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       console.log('🔄 Tentando criar conta para:', sanitizedEmail);
       console.log('📝 Dados do cadastro:', { email: sanitizedEmail, name: sanitizedName, passwordLength: sanitizedPassword.length });
-      
-      // Conforme documentação Supabase JS v2: usar signUp({ email, password, options })
-      const appUrl = (process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')).replace(/\/$/, '');
-      const { data, error } = await supabase.auth.signUp({
-        email: sanitizedEmail,
-        password: sanitizedPassword,
-        options: {
-          // URL para redireciono de confirmação de email (se email confirmation estiver ativo)
-          emailRedirectTo: appUrl ? `${appUrl}/envio` : undefined,
-          // user_metadata
-          data: {
-            full_name: sanitizedName || sanitizedEmail.split('@')[0]
-          }
+
+      // Usar endpoint server-side para criar usuário com email_confirm sem verificação
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sanitizedEmail, password: sanitizedPassword, name: sanitizedName })
+      })
+
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({ error: 'Falha no cadastro' }))
+        console.error('❌ Erro no cadastro (server):', err)
+        return { error: { message: err.error || 'Falha ao criar conta' } }
+      }
+
+      const result = await response.json()
+
+      // Se o servidor já retornou sessão, persistir no cliente
+      if (result?.session?.access_token) {
+        // Define a sessão no cliente para manter o login
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token,
+        })
+        if (setSessionError) {
+          console.warn('⚠️ Falha ao definir sessão diretamente, tentando login com senha...', setSessionError)
         }
-      });
-
-      if (error) {
-        console.error('❌ Erro no cadastro:', error);
-        return { error };
       }
 
-      console.log('✅ Cadastro realizado com sucesso:', data);
-      
-      // Verificar se o usuário foi criado
-      if (data.user) {
-        console.log('👤 Usuário criado:', data.user.email);
-        console.log('📧 Email confirmado:', data.user.email_confirmed_at);
+      // Caso não tenha sessão, faz login com senha normalmente
+      if (!result?.session) {
+        await supabase.auth.signInWithPassword({ email: sanitizedEmail, password: sanitizedPassword })
       }
-      
-      return { error: null };
+
+      return { error: null }
     } catch (error) {
       console.error('❌ Erro inesperado no cadastro:', error);
       return { error: { message: 'Erro inesperado. Tente novamente.' } };

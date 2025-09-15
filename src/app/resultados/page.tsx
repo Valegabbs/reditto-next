@@ -101,12 +101,13 @@ export default function ResultadosPage() {
       <div className="min-h-screen bg-background">
 
       {/* Header (copiado da página de envio) */}
-      <div className="flex items-center justify-between p-6 max-w-6xl mx-auto">
-        <div className="flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+      <div className="flex items-center p-6 max-w-6xl mx-auto">
+        {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
+        <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
           <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
           <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-3">
           <button 
             onClick={() => {
               const current = document.documentElement.getAttribute('data-theme') || 'dark';
