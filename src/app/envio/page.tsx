@@ -18,7 +18,7 @@ export default function EnvioPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeMenu, setActiveMenu] = useState<'historico' | 'evolucao'>('historico');
-  const [sidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,9 +70,9 @@ export default function EnvioPage() {
         <div className="flex">
           {/* Botão de Retorno - Posição Fixa */}
           <button
-            onClick={() => router.push('/')}
+            onClick={() => setSidebarCollapsed(prev => !prev)}
             className="fixed left-3 top-6 z-50 p-2 rounded-lg backdrop-blur-sm transition-colors sidebar-toggle-button"
-            aria-label="Voltar"
+            aria-label="Alternar sidebar"
           >
             <ChevronLeft size={20} />
           </button>
