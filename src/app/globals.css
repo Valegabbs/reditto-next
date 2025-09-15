@@ -72,6 +72,62 @@ body {
   .btn-secondary {
     @apply bg-gray-800/20 hover:bg-gray-700/30 text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-gray-700/50 backdrop-blur-sm;
   }
+  /* Microinterações de botões */
+  .btn-primary,
+  .btn-secondary {
+    transform: translateY(0) scale(1);
+    transition-property: transform, box-shadow, background-color, background, filter, border-color, color;
+    transition-duration: 200ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, box-shadow, filter;
+  }
+
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: translateY(0.5px) scale(0.98);
+    transition-duration: 75ms;
+  }
+
+  .btn-primary:focus-visible,
+  .btn-secondary:focus-visible {
+    @apply outline-none ring-2 ring-purple-500/60 ring-offset-2 ring-offset-transparent;
+  }
+
+  .btn-primary:disabled,
+  .btn-secondary:disabled {
+    @apply opacity-60 cursor-not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Realce específico do primário */
+  .btn-primary:hover {
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.22), 0 2px 6px rgba(0, 0, 0, 0.2);
+    filter: saturate(1.05);
+  }
+
+  .btn-secondary:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .btn-primary,
+    .btn-secondary {
+      transition-duration: 0ms;
+      transform: none !important;
+    }
+    .btn-primary:hover,
+    .btn-secondary:hover,
+    .btn-primary:active,
+    .btn-secondary:active {
+      transform: none !important;
+    }
+  }
   .panel-base {
     @apply bg-white/5 backdrop-blur-sm border border-gray-600/30 rounded-2xl;
     background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.08) 100%);
@@ -155,7 +211,7 @@ body {
   }
 
   [data-theme="light"] .toggle-button-inactive {
-    @apply bg-gray-100 text-gray-600 border border-gray-200;
+    @apply bg-gray-100 text-gray-600;
   }
 
   /* Garantir texto branco em botões roxos no tema claro */
@@ -194,5 +250,59 @@ body {
   /* Light theme sidebar toggle button */
   [data-theme="light"] .sidebar-toggle-button {
     @apply bg-white/90 text-gray-700 hover:bg-gray-100 border border-gray-200;
+  }
+  
+  /* Toggle buttons: estados e microinterações coerentes */
+  .toggle-button-active,
+  .toggle-button-inactive {
+    transform: translateY(0) scale(1);
+    transition-property: transform, box-shadow, background-color, background, border-color, color, filter;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform, box-shadow, border-color, filter;
+    border-width: 0;
+  }
+
+  .toggle-button-inactive:hover {
+    @apply border border-white/20;
+    transform: translateY(-1px);
+  }
+
+  .toggle-button-active:hover {
+    @apply border border-white/20;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.22), 0 2px 6px rgba(0, 0, 0, 0.2);
+    filter: saturate(1.05);
+    transform: translateY(-1px);
+  }
+
+  /* Hover border para tema claro */
+  [data-theme="light"] .toggle-button-inactive:hover,
+  [data-theme="light"] .toggle-button-active:hover {
+    @apply border border-gray-300;
+  }
+
+  .toggle-button-active:active,
+  .toggle-button-inactive:active {
+    transform: translateY(0.5px) scale(0.985);
+    transition-duration: 75ms;
+  }
+
+  .toggle-button-active:focus-visible,
+  .toggle-button-inactive:focus-visible {
+    @apply outline-none ring-2 ring-purple-500/60 ring-offset-2 ring-offset-transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toggle-button-active,
+    .toggle-button-inactive {
+      transition-duration: 0ms;
+      transform: none !important;
+    }
+    .toggle-button-active:hover,
+    .toggle-button-inactive:hover,
+    .toggle-button-active:active,
+    .toggle-button-inactive:active {
+      transform: none !important;
+    }
   }
 }

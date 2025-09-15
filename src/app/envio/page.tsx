@@ -200,7 +200,7 @@ export default function EnvioPage() {
                        className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-2xl transition-all font-medium backdrop-blur-sm ${
                          submissionType === 'text'
                            ? 'toggle-button-active bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white shadow-lg'
-                           : 'toggle-button-inactive bg-gray-800/30 text-gray-400 hover:bg-gray-700/40 border border-gray-600/40'
+                           : 'toggle-button-inactive bg-gray-800/30 text-gray-400 hover:bg-gray-700/40'
                        }`}
                      >
                        <FileText size={20} />
@@ -212,7 +212,7 @@ export default function EnvioPage() {
                        className={`flex-1 flex items-center justify-center gap-2 py-4 px-6 rounded-2xl transition-all font-medium backdrop-blur-sm ${
                          submissionType === 'image'
                            ? 'toggle-button-active bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 text-white shadow-lg'
-                           : 'toggle-button-inactive bg-gray-800/30 text-gray-400 hover:bg-gray-700/40 border border-gray-600/40'
+                           : 'toggle-button-inactive bg-gray-800/30 text-gray-400 hover:bg-gray-700/40'
                        }`}
                      >
                        <ImageIcon size={20} />
