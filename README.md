@@ -1,4 +1,4 @@
-# Reditto - Plataforma de Correção de Redação 🤖
+# Reditto - Plataforma de Correção de Redação 
 
 Uma plataforma moderna para correção automática de redações, integrada com IA própria hospedada na VPS Hostinger.
 
