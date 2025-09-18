@@ -1,4 +1,4 @@
-# Reditto - Configuração de Desenvolvimento
+# Reditto em next - Configuração de Desenvolvimento
 
 ## Scripts Disponíveis
 
