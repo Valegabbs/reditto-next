@@ -121,7 +121,7 @@ export default function HomePage() {
         <div className="flex items-center p-6 max-w-6xl mx-auto">
           {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
           <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
-            <Image src="/logo reditto.png" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+            <Image src="/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
             <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
           </div>
           <button 
@@ -136,7 +136,7 @@ export default function HomePage() {
         {/* Main Content */}
         <main className="max-w-md mx-auto px-6 py-12">
           <div className="text-center mb-8">
-            <Image src="/logo reditto.png" alt="Reditto Logo" width={80} height={80} className="mx-auto mb-4" />
+            <Image src="/logo.PNG" alt="Reditto Logo" width={80} height={80} className="mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo ao Reditto</h1>
             <p className="text-gray-300">
               Sua plataforma inteligente para correção de redações

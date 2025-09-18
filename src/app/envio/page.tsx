@@ -62,7 +62,7 @@ export default function EnvioPage() {
       window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
     } catch (error) {
       console.error('❌ Erro ao preparar envio:', error);
-      alert(`Erro ao preparar o processamento: ${error instanceof Error ? error.message : 'Tente novamente.'}`);
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: `Erro ao preparar o processamento: ${error instanceof Error ? error.message : 'Tente novamente.'}`, type: 'error' } }));
       setIsLoading(false);
     }
   };
@@ -83,8 +83,8 @@ export default function EnvioPage() {
           {/* Header */}
           <div className="flex items-center p-6">
             {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
-            <div className="hidden md:flex gap-3 items-center ml-4 header-item">
-              <Image src="/logo reditto.png" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
+              <div className="hidden md:flex gap-3 items-center ml-4 header-item">
+              <Image src="/logo.PNG" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
               <span className="text-base font-medium header-text text-white/90">Correção de Redação para Todos!</span>
             </div>
             <div className="ml-auto flex gap-3 items-center">

@@ -8,12 +8,12 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Reditto",
   description: "Plataforma de correção de redações",
-  icons: {
+    icons: {
     icon: [
-      { url: '/logo reditto.png?v=2', type: 'image/png' },
+      { url: '/logo.PNG?v=2', type: 'image/png' },
     ],
-    shortcut: ['/logo reditto.png?v=2'],
-    apple: ['/logo reditto.png?v=2'],
+    shortcut: ['/logo.PNG?v=2'],
+    apple: ['/logo.PNG?v=2'],
   },
 };
 

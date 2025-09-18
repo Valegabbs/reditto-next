@@ -64,14 +64,17 @@ export default function HistoricoPage() {
   }, [user, isConfigured]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Deseja realmente excluir esta redação?')) return;
     try {
+      const ok = await (window as any).redittoConfirm?.('Deseja realmente excluir esta redação?');
+      if (!ok) return;
+
       const { error } = await supabase.from('essays').delete().eq('id', id).eq('user_id', user?.id);
       if (error) throw error;
       setEssays(prev => prev.filter(e => e.id !== id));
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Redação excluída com sucesso.', type: 'success' } }));
     } catch (err) {
       console.error('Erro ao excluir redação:', err);
-      alert('Falha ao excluir. Tente novamente.');
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Falha ao excluir. Tente novamente.', type: 'error' } }));
     }
   };
 
