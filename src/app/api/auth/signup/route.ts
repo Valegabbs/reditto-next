@@ -16,29 +16,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Supabase não configurado' }, { status: 500 })
     }
 
-    const admin = createClient(url, serviceKey)
+  const admin = createClient(url, serviceKey)
 
-    // Criar usuário com email_confirm true para dispensar verificação de email
-    const { data: userData, error: createError } = await admin.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true,
-      user_metadata: { full_name: name || (email as string).split('@')[0] }
-    })
+  // Criar usuário com email_confirm true para dispensar verificação de email
+  const { data: userData, error: createError } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { full_name: name || (email as string).split('@')[0] }
+  })
 
-    if (createError) {
-      return NextResponse.json({ error: createError.message }, { status: 400 })
-    }
+  if (createError) {
+    return NextResponse.json({ error: createError.message }, { status: 400 })
+  }
 
-    // Criar um token de sessão para este usuário (link mágico) e trocar por sessão client-side
-    // Alternativa: retornar nada e o client faz signInWithPassword. Vamos optar por login direto aqui.
-    const { error: signInError, data: sessionData } = await admin.auth.signInWithPassword({ email, password })
-    if (signInError) {
-      // Mesmo que o login direto com admin falhe (não recomendado usar admin para signIn), caímos no client login
-      return NextResponse.json({ user: userData.user, requiresClientLogin: true })
-    }
-
-    return NextResponse.json({ user: sessionData.user, session: sessionData.session })
+  // Por razões de segurança e compatibilidade com o fluxo client-side do SDK,
+  // não tentamos criar uma sessão server-side com a service role key.
+  // Em vez disso, informamos ao cliente que precisa realizar o login imediatamente
+  // usando o método padrão `signInWithPassword`, garantindo que a sessão seja
+  // criada e persistida no cliente.
+  return NextResponse.json({ user: userData.user, requiresClientLogin: true })
   } catch (error: any) {
     return NextResponse.json({ error: error?.message || 'Erro interno' }, { status: 500 })
   }

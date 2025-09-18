@@ -128,24 +128,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const result = await response.json()
 
-      // Se o servidor já retornou sessão, persistir no cliente
-      if (result?.session?.access_token) {
-        // Define a sessão no cliente para manter o login
-        const { error: setSessionError } = await supabase.auth.setSession({
-          access_token: result.session.access_token,
-          refresh_token: result.session.refresh_token,
-        })
-        if (setSessionError) {
-          console.warn('⚠️ Falha ao definir sessão diretamente, tentando login com senha...', setSessionError)
+      // Se o servidor indicar que o cliente deve realizar o login,
+      // fazemos o signInWithPassword no cliente para garantir que a
+      // sessão seja criada e persistida pelo SDK do Supabase.
+      if (result?.requiresClientLogin) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email: sanitizedEmail, password: sanitizedPassword });
+        if (error) {
+          console.error('❌ Erro no login automático após cadastro:', error);
+          return { error };
+        }
+        // data.session será emitida pelo listener onAuthStateChange; ainda assim
+        // garantimos que o estado local seja consistente
+        if (data?.session) {
+          setSession(data.session);
+          setUser(data.user ?? null);
         }
       }
 
-      // Caso não tenha sessão, faz login com senha normalmente
-      if (!result?.session) {
-        await supabase.auth.signInWithPassword({ email: sanitizedEmail, password: sanitizedPassword })
+      // Se o servidor retornou diretamente sessão (fluxo raro), definimos no cliente
+      if (result?.session?.access_token) {
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: result.session.access_token,
+          refresh_token: result.session.refresh_token,
+        });
+        if (setSessionError) {
+          console.warn('⚠️ Falha ao definir sessão diretamente:', setSessionError);
+          // fallback: tentar login com senha
+          await supabase.auth.signInWithPassword({ email: sanitizedEmail, password: sanitizedPassword });
+        }
       }
 
-      return { error: null }
+      return { error: null };
     } catch (error) {
       console.error('❌ Erro inesperado no cadastro:', error);
       return { error: { message: 'Erro inesperado. Tente novamente.' } };
@@ -222,3 +235,4 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+

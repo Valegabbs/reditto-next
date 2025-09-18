@@ -58,6 +58,7 @@ export default function EnvioPage() {
         throw new Error(errorData.error || 'Falha ao processar a redação');
       }
       const result = await response.json();
+      // Redirecionar diretamente para a página de resultados
       window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
     } catch (error) {
       console.error('❌ Erro ao preparar envio:', error);

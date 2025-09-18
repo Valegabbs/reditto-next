@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, History, TrendingUp, Star, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Home, History, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar() {
@@ -117,12 +117,7 @@ export default function Sidebar() {
               label="Evolução"
               title="Evolução"
             />
-            <Button
-              href="/favoritas"
-              icon={<Star size={18} />}
-              label="Favoritas"
-              title="Favoritas"
-            />
+            {/* Favoritas removida */}
           </div>
         </div>
       </aside>

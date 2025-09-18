@@ -1,15 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 export default function ResultadosPage() {
   const [result, setResult] = useState<any>(null);
-  const { signOut } = useAuth();
+  const { signOut, user, isConfigured } = useAuth();
+  const savedRef = useRef(false);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -30,6 +32,68 @@ export default function ResultadosPage() {
       setResult(getExampleData());
     }
   }, []);
+
+  // Salvar automaticamente a redação no histórico do usuário autenticado
+  useEffect(() => {
+    if (!result || !user || !isConfigured) return;
+
+    // Evitar múltiplas execuções causadas por re-renders
+    if (savedRef.current) return;
+    savedRef.current = true;
+
+    (async () => {
+      try {
+        const record = {
+          user_id: user.id,
+          topic: (result.topic as string) || null,
+          essay_text: (result.originalEssay as string) || '',
+          final_score: (result.finalScore as number) ?? null,
+          competencies: result.competencies ? JSON.stringify(result.competencies) : null,
+          feedback: result.feedback ? JSON.stringify(result.feedback) : null,
+        };
+
+        const serialized = JSON.stringify(record);
+        const lastSaved = sessionStorage.getItem('lastSavedEssay');
+        if (lastSaved === serialized) {
+          // Já salvo nessa sessão
+          return;
+        }
+
+        // Verificar no banco se já existe um registro similar (proteção contra efeitos duplos)
+        try {
+          const { data: existing, error: selectError } = await supabase
+            .from('essays')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('essay_text', record.essay_text)
+            .eq('final_score', record.final_score)
+            .limit(1);
+
+          if (selectError) {
+            console.warn('Erro ao checar duplicatas antes de salvar:', selectError);
+          } else if (existing && existing.length > 0) {
+            // Já existe um registro idêntico
+            try { sessionStorage.setItem('lastSavedEssay', serialized); } catch {}
+            return;
+          }
+        } catch (err) {
+          console.warn('Erro inesperado na verificação de duplicatas:', err);
+        }
+
+        const { data, error } = await supabase.from('essays').insert(record).select().single();
+        if (error) {
+          console.error('Erro ao salvar redação no histórico:', error);
+        } else {
+          try { sessionStorage.setItem('lastSavedEssay', serialized); } catch {}
+          console.log('Redação salva no histórico:', data?.id);
+        }
+      } catch (err) {
+        console.error('Erro inesperado ao salvar redação:', err);
+      }
+    })();
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [result, user, isConfigured]);
 
   const getExampleData = () => {
     return {

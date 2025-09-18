@@ -69,6 +69,9 @@ body {
   .btn-primary {
     @apply bg-gradient-to-r from-purple-600 via-purple-700 to-purple-800 hover:from-purple-700 hover:via-purple-800 hover:to-purple-900 text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-purple-500/20 backdrop-blur-sm;
   }
+  .btn-primary, .btn-secondary, .input-field, .card, .panel-base, .floating-menu, .sidebar-button-inactive, .sidebar-button-active {
+    transition: transform 150ms ease, box-shadow 150ms ease, background-color 180ms ease, color 180ms ease;
+  }
   .btn-secondary {
     @apply bg-gray-800/20 hover:bg-gray-700/30 text-white font-medium py-3 px-6 rounded-2xl transition-all duration-200 flex items-center gap-2 border border-gray-700/50 backdrop-blur-sm;
   }
@@ -141,6 +144,10 @@ body {
   [data-theme="light"] .header-text {
     @apply text-gray-700;
   }
+
+  /* Cor do título Disclaimer (tema claro/escuro) */
+  .text-disclaimer { color: var(--foreground); }
+  [data-theme="light"] .text-disclaimer { color: #1f2937; }
 
   /* Hamburger color per theme */
   .hamburger-bars { background-color: #ffffff; }
