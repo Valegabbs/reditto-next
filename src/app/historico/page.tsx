@@ -27,7 +27,7 @@ export default function HistoricoPage() {
     try {
       const { data, error } = await supabase
         .from('essays')
-        .select('id, topic, final_score, created_at')
+        .select('id, topic, final_score, created_at, essay_text, competencies, feedback')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
@@ -88,40 +88,90 @@ export default function HistoricoPage() {
                   <p className="text-gray-300">Seu histórico aparecerá aqui quando houver registros.</p>
                 ) : (
                   <div className="grid grid-cols-1 gap-4">
-                    {essays.map((e, idx) => (
-                      <article key={e.id} onClick={() => window.location.href = `/historico/${e.id}`} className="group cursor-pointer p-6 rounded-2xl panel-base border border-gray-700/40 hover:scale-105 transform transition-all duration-200">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="rounded-full bg-yellow-500/10 p-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
-                              </svg>
+                    {essays.map((e, idx) => {
+                      // preparar competências para exibição
+                      let comps: any = null;
+                      try { comps = e.competencies ? (typeof e.competencies === 'string' ? JSON.parse(e.competencies) : e.competencies) : null; } catch { comps = null; }
+                      const c1 = comps ? (comps['Competência I'] ?? comps['C1'] ?? '—') : '—';
+                      const c2 = comps ? (comps['Competência II'] ?? comps['C2'] ?? '—') : '—';
+                      const c3 = comps ? (comps['Competência III'] ?? comps['C3'] ?? '—') : '—';
+                      const c4 = comps ? (comps['Competência IV'] ?? comps['C4'] ?? '—') : '—';
+                      const c5 = comps ? (comps['Competência V'] ?? comps['C5'] ?? '—') : '—';
+
+                      const title = `Redação ${idx + 1}: ${e.topic || 'Sem tema'}`;
+
+                      const performanceText = (score: number | null) => {
+                        const s = score ?? 0;
+                        if (s >= 900) return 'Excelente! Redação nota 1000!';
+                        if (s >= 800) return 'Muito bom! Ótima redação!';
+                        if (s >= 700) return 'Bom desempenho! Continue melhorando!';
+                        if (s >= 600) return 'Desempenho mediano. Há espaço para melhoria.';
+                        if (s >= 400) return 'Desempenho insuficiente. Foque nos pontos de atenção.';
+                        return 'Desempenho precário. Revise os critérios do ENEM.';
+                      };
+
+                      const handleOpen = async () => {
+                        // construir payload semelhante ao de /resultados
+                        const payload = {
+                          finalScore: e.final_score ?? 0,
+                          competencies: comps,
+                          feedback: e.feedback ? (typeof e.feedback === 'string' ? JSON.parse(e.feedback) : e.feedback) : null,
+                          originalEssay: e.essay_text || '',
+                          topic: e.topic || null
+                        };
+                        window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(payload))}`;
+                      };
+
+                      return (
+                        <article key={e.id} onClick={handleOpen} className="group cursor-pointer p-6 rounded-2xl panel-base border border-gray-700/40 hover:scale-105 transform transition-all duration-200">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="rounded-full bg-yellow-500/10 p-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                                </svg>
+                              </div>
+                              <div>
+                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-800/60 to-gray-800/40 px-4 py-1 rounded-full">
+                                  <div className="text-xs font-semibold tracking-wide text-yellow-400">&nbsp;</div>
+                                  <div className="text-sm font-semibold text-white">{title}</div>
+                                </div>
+                                <div className="text-sm text-gray-400 mt-2">Enviada em: {new Date(e.created_at).toLocaleString()}</div>
+                              </div>
+                            </div>
+
+                            <div className="text-center">
+                              <div className="text-5xl font-extrabold text-purple-400">{e.final_score ?? '—'}</div>
+                              <div className="text-sm text-gray-300">pontos de 1000</div>
+                              <div className="text-xs text-gray-400 mt-2">{performanceText(e.final_score ?? 0)}</div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-5 gap-4 mt-6 text-center">
+                            <div>
+                              <div className="text-lg font-bold text-purple-300">{c1}</div>
+                              <div className="text-xs text-gray-400">C1</div>
                             </div>
                             <div>
-                              <div className="text-lg font-semibold text-white">{`Redação ${idx + 1}: ${e.topic || 'Sem tema'}`}</div>
-                              <div className="text-sm text-gray-400">Enviada em: {new Date(e.created_at).toLocaleString()}</div>
+                              <div className="text-lg font-bold text-purple-300">{c2}</div>
+                              <div className="text-xs text-gray-400">C2</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-purple-300">{c3}</div>
+                              <div className="text-xs text-gray-400">C3</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-purple-300">{c4}</div>
+                              <div className="text-xs text-gray-400">C4</div>
+                            </div>
+                            <div>
+                              <div className="text-lg font-bold text-purple-300">{c5}</div>
+                              <div className="text-xs text-gray-400">C5</div>
                             </div>
                           </div>
-
-                          <div className="flex items-center gap-4">
-                            <div className="text-3xl font-extrabold text-purple-400">{e.final_score ?? '—'}</div>
-                            <button onClick={(ev) => { ev.stopPropagation(); handleDelete(e.id); }} className="text-sm text-red-400 hover:text-red-600 transition-colors">Excluir</button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-sm text-gray-400">
-                          <div className="flex items-center gap-6">
-                            {/* Pequena prévia das competências (se houver) - mostramos placeholders se não */}
-                            <div>C1: <span className="text-purple-300 font-semibold">{/* placeholder */ '—'}</span></div>
-                            <div>C2: <span className="text-purple-300 font-semibold">{'—'}</span></div>
-                            <div>C3: <span className="text-purple-300 font-semibold">{'—'}</span></div>
-                            <div>C4: <span className="text-purple-300 font-semibold">{'—'}</span></div>
-                            <div>C5: <span className="text-purple-300 font-semibold">{'—'}</span></div>
-                          </div>
-                          <div className="text-xs text-gray-500">Clique para ver a correção completa</div>
-                        </div>
-                      </article>
-                    ))}
+                        </article>
+                      );
+                    })}
                   </div>
                 )}
               </div>
