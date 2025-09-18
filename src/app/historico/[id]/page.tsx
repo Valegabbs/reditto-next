@@ -33,6 +33,22 @@ export default function HistoricoDetailPage() {
 
   const handleBack = () => router.push('/historico');
 
+  const openAsResultadosLocal = () => {
+    try {
+      const payload = {
+        finalScore: essay.final_score,
+        competencies: essay.competencies ? JSON.parse(essay.competencies) : null,
+        feedback: essay.feedback ? JSON.parse(essay.feedback) : null,
+        originalEssay: essay.essay_text,
+        topic: essay.topic || null
+      };
+      const url = `/resultados?data=${encodeURIComponent(JSON.stringify(payload))}`;
+      if (typeof window !== 'undefined') window.location.href = url;
+    } catch (err) {
+      console.error('Erro ao abrir como resultados:', err);
+    }
+  };
+
   if (loading) {
     return (
       <ClientWrapper showFloatingMenu={false}>
@@ -66,7 +82,11 @@ export default function HistoricoDetailPage() {
               <div className="flex items-center justify-between mb-6">
                 <button onClick={handleBack} className="text-sm text-gray-300 hover:text-white">← Voltar</button>
                 <h1 className="text-2xl font-bold text-white">Redação</h1>
-                <div />
+                <div>
+                  <button onClick={openAsResultadosLocal} className="px-3 py-2 rounded-md btn-primary">
+                    Ver como Resultado
+                  </button>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 gap-6">
@@ -113,22 +133,7 @@ export default function HistoricoDetailPage() {
 
 // Redirecionar para a página de resultados com os dados reconstruídos
 // quando o usuário preferir ver a UI exata de resultados
-export async function openAsResultados(essayRecord: any) {
-  try {
-    const payload = {
-      finalScore: essayRecord.final_score,
-      competencies: essayRecord.competencies ? JSON.parse(essayRecord.competencies) : null,
-      feedback: essayRecord.feedback ? JSON.parse(essayRecord.feedback) : null,
-      originalEssay: essayRecord.essay_text,
-      topic: essayRecord.topic || null
-    };
-    // Abrir nova URL com dados serializados
-    const url = `/resultados?data=${encodeURIComponent(JSON.stringify(payload))}`;
-    if (typeof window !== 'undefined') window.location.href = url;
-  } catch (err) {
-    console.error('Erro ao abrir como resultados:', err);
-  }
-}
+// compat shim: export não necessário para a rota; removido para evitar erro de build
 
 
 

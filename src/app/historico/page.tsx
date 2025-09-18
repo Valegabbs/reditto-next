@@ -10,6 +10,9 @@ interface EssayRow {
   id: string;
   topic?: string | null;
   final_score?: number | null;
+  essay_text?: string | null;
+  competencies?: any;
+  feedback?: any;
   created_at: string;
 }
 
@@ -46,9 +49,11 @@ export default function HistoricoPage() {
     // Inscrever para mudanças em tempo real (opcional)
     const subscription = supabase
       .channel('public:essays')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'essays' }, (payload) => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'essays' }, (payload: any) => {
         // Recarregar ao detectar mudança relevante para este usuário
-        if (payload.record?.user_id === user?.id) loadEssays();
+        // Payload shape can vary between SDK versions: check common fields
+        const rec = payload?.record ?? payload?.new ?? (Array.isArray(payload?.rows) ? payload.rows[0] : null);
+        if (rec?.user_id === user?.id) loadEssays();
       })
       .subscribe();
 
