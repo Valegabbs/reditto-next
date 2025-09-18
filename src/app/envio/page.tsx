@@ -121,7 +121,7 @@ export default function EnvioPage() {
               </p>
               {user && (
                 <p className="mt-2 text-sm text-purple-400">
-                  Olá, {user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto.
+                  Olá, {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto.
                 </p>
               )}
               {!isConfigured && (

@@ -207,14 +207,14 @@ export default function HomePage() {
                 {!isLogin && (
                   <div>
                     <label className="block text-white font-medium mb-2">
-                      Nome completo
+                      Seu Nome
                     </label>
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Seu nome completo"
+                      placeholder="Seu nome"
                       className="input-field w-full"
                       required={!isLogin}
                     />
