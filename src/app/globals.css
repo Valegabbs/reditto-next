@@ -1,3 +1,57 @@
+[data-theme="light"] .hist-date { color: #000; }
+[data-theme="light"] .hist-score { color: #7734e7; }
+[data-theme="light"] .hist-score-desc { color: #7734e7; }
+[data-theme="light"] .hist-feedback { color: #000; }
+
+[data-theme="light"] .status-circle { background: #16a34a; }
+[data-theme="dark"] .status-circle { background: #16a34a; }
+[data-theme="light"] .status-circle svg, [data-theme="dark"] .status-circle svg { display: block; }
+[data-theme="light"] .evolution-chart {
+  background: linear-gradient(180deg,#0f172a05,#0f172a08); /* subtle dark overlay like dark theme */
+  border-radius: 12px;
+}
+
+[data-theme="light"] .evolution-chart svg {
+  background: #0f172a00; /* transparent so SVG fills match dark style via CSS */
+}
+
+[data-theme="light"] .evolution-chart .fill-area {
+  fill: rgba(119,52,231,0.06);
+}
+
+[data-theme="light"] .x-label { fill: rgba(11,18,32,0.6); }
+[data-theme="light"] .y-label { fill: #7734e7; }
+
+/* Restore explicit dark-theme styles for components that were accidentally affected
+   Ensure dark theme keeps its original appearance (cards, panels, inputs, charts) */
+[data-theme="dark"] .card,
+[data-theme="dark"] .panel-base,
+[data-theme="dark"] .main-form {
+  @apply bg-gray-800/20 backdrop-blur-xl;
+  border: 1px solid rgba(55,65,81,0.5);
+  color: white;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .input-field {
+  @apply bg-gray-800/20 text-white;
+  border: 1px solid rgba(55,65,81,0.5);
+}
+
+[data-theme="dark"] .hist-score { color: var(--primary); }
+[data-theme="dark"] .hist-score-desc { color: #cbb7ff; }
+[data-theme="dark"] .hist-date, [data-theme="dark"] .hist-feedback { color: rgba(255,255,255,0.75); }
+
+[data-theme="dark"] .evolution-chart {
+  background: linear-gradient(180deg,#0b0f14,#0f131c);
+  border-radius: 12px;
+}
+[data-theme="dark"] .evolution-chart svg { background: transparent; }
+[data-theme="dark"] .evolution-chart .fill-area { fill: rgba(11,12,20,0.6); }
+[data-theme="dark"] .x-label { fill: rgba(255,255,255,0.7); }
+[data-theme="dark"] .y-label { fill: rgba(255,255,255,0.35); }
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6,6 +60,7 @@
   --background: #0f131c;
   --foreground: #ffffff;
   --primary: #8b5cf6;
+  --reditto-purple: #7734e7;
   --primary-foreground: #ffffff;
   --secondary: #1f1f1f;
   --secondary-foreground: #e5e5e5;
@@ -18,6 +73,89 @@
   --ring: #8b5cf6;
   --radius: 0.75rem;
 }
+
+/* Additional light-theme surface improvements: remove cold grays and use soft white/purple surfaces
+   Target pages with many cards (Histórico, Evolução) to improve UX and contrast. */
+
+[data-theme="light"] .panel-base,
+[data-theme="light"] .card,
+[data-theme="light"] .main-form {
+  background: linear-gradient(180deg, #ffffff 0%, #fbf7ff 100%); /* white -> very light purple */
+  border: 1px solid rgba(124,58,237,0.06); /* subtle purple-tinged border */
+  color: var(--secondary-foreground);
+}
+
+[data-theme="light"] .card {
+  box-shadow: 0 6px 18px rgba(43,36,64,0.04);
+}
+
+[data-theme="light"] .panel-base .text-gray-400,
+[data-theme="light"] .card .text-gray-400,
+[data-theme="light"] .main-form .text-gray-400 {
+  color: rgba(11,18,32,0.6); /* replace pale gray with clear dark */
+}
+
+[data-theme="light"] .btn-secondary {
+  background: linear-gradient(180deg, #fff 0%, #fbf7ff 100%);
+  color: var(--foreground);
+  border: 1px solid rgba(124,58,237,0.06);
+}
+
+[data-theme="light"] .input-field {
+  background: #fff;
+  color: var(--foreground);
+  border: 1px solid rgba(43,36,64,0.06);
+}
+
+[data-theme="light"] .floating-menu {
+  background: linear-gradient(180deg,#ffffffcc,#fbf7ffcc);
+  color: var(--foreground);
+}
+
+
+/* ---------------------------------------------
+   Light theme visual polishing (overrides)
+   - Remove pale gray tones and favor strong contrast
+   - Use purple accents and near-black text for readability
+   - These rules intentionally override earlier light-theme grays
+---------------------------------------------- */
+
+[data-theme="light"] .btn-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid rgba(43,36,64,0.06);
+}
+
+[data-theme="light"] .card {
+  background: var(--secondary);
+  border: 1px solid rgba(43,36,64,0.06);
+  box-shadow: 0 2px 8px rgba(34,16,82,0.03);
+}
+
+[data-theme="light"] .input-field {
+  background: var(--input);
+  border: 1px solid rgba(43,36,64,0.06);
+  color: var(--foreground);
+}
+
+[data-theme="light"] .text-white { color: var(--foreground); }
+[data-theme="light"] .text-gray-300 { color: rgba(124,58,237,0.95); }
+[data-theme="light"] .text-gray-400 { color: rgba(11,18,32,0.65); }
+
+[data-theme="light"] .toggle-button-inactive {
+  background: #fbf7ff; /* subtle purple tint */
+  color: rgba(11,18,32,0.8);
+  border: 1px solid rgba(43,36,64,0.05);
+}
+
+[data-theme="light"] .sidebar-button-inactive {
+  background: var(--secondary);
+  color: rgba(11,18,32,0.85);
+  border: 1px solid rgba(43,36,64,0.04);
+}
+
+[data-theme="light"] .header-text { color: var(--foreground); }
+
 
 /* Light theme variables (toggle via data-theme attribute) */
 :root[data-theme="light"] {

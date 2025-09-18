@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { Sun } from 'lucide-react';
 import ClientWrapper from '../components/ClientWrapper';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +19,7 @@ interface EssayRow {
 }
 
 export default function HistoricoPage() {
-  const { user, isConfigured } = useAuth();
+  const { user, isConfigured, signOut } = useAuth();
   const [essays, setEssays] = useState<EssayRow[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -78,6 +80,11 @@ export default function HistoricoPage() {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = '/';
+  };
+
   return (
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
@@ -85,8 +92,31 @@ export default function HistoricoPage() {
           <Sidebar />
           <div className="w-full">
             <div className="max-w-5xl px-6 py-8 mx-auto">
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center p-6 mb-4">
+                <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+                  <Image src="/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+                  <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
+                </div>
+                <button
+                  onClick={() => {
+                    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('reditto-theme', next); } catch {}
+                  }}
+                  className="ml-auto text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text"
+                  aria-label="Alternar tema"
+                >
+                  <Sun size={20} />
+                </button>
+                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-400 transition-colors p-2 rounded-full">
+                  Sair
+                </button>
+              </div>
+
+              <div className="mb-6">
                 <h1 className="text-3xl font-bold text-white">Histórico de Redações</h1>
+                <p className="text-gray-300 mt-2">Veja todas as suas redações corrigidas — toque em qualquer card para rever a correção completa.</p>
               </div>
 
               <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
@@ -134,46 +164,46 @@ export default function HistoricoPage() {
                         <article key={e.id} onClick={handleOpen} className="group cursor-pointer p-6 rounded-2xl panel-base border border-gray-700/40 hover:scale-105 transform transition-all duration-200">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
-                              <div className="rounded-full bg-yellow-500/10 p-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-yellow-400" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4" />
+                              <div className="status-circle p-2 rounded-full" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                  <path fill="#ffffff" d="M20.285 6.708a1 1 0 00-1.414-1.416l-9.193 9.193-3.172-3.172a1 1 0 10-1.414 1.414l3.88 3.88a1 1 0 001.414 0l9.899-9.899z" />
                                 </svg>
                               </div>
                               <div>
-                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-800/60 to-gray-800/40 px-4 py-1 rounded-full">
+                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-200/60 to-gray-200/40 px-4 py-1 rounded-full">
                                   <div className="text-xs font-semibold tracking-wide text-yellow-400">&nbsp;</div>
-                                  <div className="text-sm font-semibold text-white">{title}</div>
+                                  <div className="text-sm font-semibold text-black">{title}</div>
                                 </div>
-                                <div className="text-sm text-gray-400 mt-2">Enviada em: {new Date(e.created_at).toLocaleString()}</div>
+                                <div className="text-sm hist-date mt-2">Enviada em: {new Date(e.created_at).toLocaleString()}</div>
                               </div>
                             </div>
 
                             <div className="text-center">
-                              <div className="text-5xl font-extrabold text-purple-400">{e.final_score ?? '—'}</div>
-                              <div className="text-sm text-gray-300">pontos de 1000</div>
-                              <div className="text-xs text-gray-400 mt-2">{performanceText(e.final_score ?? 0)}</div>
+                              <div className="text-5xl font-extrabold hist-score">{e.final_score ?? '—'}</div>
+                              <div className="text-sm hist-score-desc">pontos de 1000</div>
+                              <div className="text-xs hist-feedback mt-2">{performanceText(e.final_score ?? 0)}</div>
                             </div>
                           </div>
 
                           <div className="grid grid-cols-5 gap-4 mt-6 text-center">
                             <div>
-                              <div className="text-lg font-bold text-purple-300">{c1}</div>
+                              <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c1}</div>
                               <div className="text-xs text-gray-400">C1</div>
                             </div>
                             <div>
-                              <div className="text-lg font-bold text-purple-300">{c2}</div>
+                              <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c2}</div>
                               <div className="text-xs text-gray-400">C2</div>
                             </div>
                             <div>
-                              <div className="text-lg font-bold text-purple-300">{c3}</div>
+                              <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c3}</div>
                               <div className="text-xs text-gray-400">C3</div>
                             </div>
                             <div>
-                              <div className="text-lg font-bold text-purple-300">{c4}</div>
+                              <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c4}</div>
                               <div className="text-xs text-gray-400">C4</div>
                             </div>
                             <div>
-                              <div className="text-lg font-bold text-purple-300">{c5}</div>
+                              <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c5}</div>
                               <div className="text-xs text-gray-400">C5</div>
                             </div>
                           </div>

@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState, useRef } from 'react';
+import Image from 'next/image';
+import { Sun } from 'lucide-react';
 import ClientWrapper from '../components/ClientWrapper';
 import Sidebar from '../components/Sidebar';
 import { supabase } from '@/lib/supabase';
@@ -9,7 +11,7 @@ import { useAuth } from '@/contexts/AuthContext';
 // Usaremos uma implementação simples de gráfico usando SVG para evitar
 // adicionar dependências externas. Abaixo renderizamos uma linha básica.
 
-interface DataPoint { label: string; value: number | null; }
+interface DataPoint { id?: string; label: string; value: number | null; }
 
 function InteractiveLineChart({ data }: { data: DataPoint[] }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -66,21 +68,21 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
           const y = height - padding - (t - minVal) / Math.max(1, (maxVal - minVal)) * (height - padding * 2);
           return (
             <g key={t}>
-              <line x1={padding} x2={width - padding} y1={y} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
-              <text x={padding - 10} y={y + 4} textAnchor="end" className="text-xs fill-gray-400">{t}</text>
+              <line x1={padding} x2={width - padding} y1={y} y2={y} stroke="rgba(11,18,32,0.06)" strokeWidth={1} />
+              <text x={padding - 10} y={y + 4} textAnchor="end" className="text-xs y-label">{t}</text>
             </g>
           );
         })}
 
         {/* x labels */}
         {xPositions.map((x, i) => (
-          <text key={i} x={x} y={height - 8} textAnchor="middle" className="text-xs fill-gray-400" style={{ transformOrigin: `${x}px ${height - 8}px` }}>{formatXLabel(i)}</text>
+          <text key={i} x={x} y={height - 8} textAnchor="middle" className="text-xs x-label" style={{ transformOrigin: `${x}px ${height - 8}px` }}>{formatXLabel(i)}</text>
         ))}
 
         {/* polyline */}
         <polyline
           fill="none"
-          stroke="#8b5cf6"
+          stroke="var(--reditto-purple)"
           strokeWidth={3}
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -88,15 +90,30 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
         />
 
         {/* filled area subtle */}
-        <polygon points={`${padding},${height - padding} ${points.map(p => `${p.x},${p.y}`).join(' ')} ${width - padding},${height - padding}`} fill="rgba(139,92,246,0.06)" />
+        <polygon className="fill-area" points={`${padding},${height - padding} ${points.map(p => `${p.x},${p.y}`).join(' ')} ${width - padding},${height - padding}`} />
 
-        {/* hover indicators */}
-        {hoverIndex !== null && points[hoverIndex] && (
-          <g>
-            <line x1={points[hoverIndex].x} x2={points[hoverIndex].x} y1={padding} y2={height - padding} stroke="rgba(255,255,255,0.06)" />
-            <circle cx={points[hoverIndex].x} cy={points[hoverIndex].y} r={6} fill="#fff" stroke="#8b5cf6" strokeWidth={2} />
+        {/* fixed points (always visible) */}
+        {points.map((p, i) => (
+          <g key={`pt-${i}`}>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={hoverIndex === i ? 6 : 4}
+              fill={hoverIndex === i ? '#fff' : 'var(--reditto-purple)'}
+              stroke={hoverIndex === i ? 'var(--reditto-purple)' : 'transparent'}
+              strokeWidth={2}
+              style={{ cursor: data[i]?.id ? 'pointer' : 'default' }}
+              onClick={() => {
+                if (data[i]?.id) {
+                  // Redirect to resultados page using existing record id to avoid creating new DB entries
+                  window.location.href = `/resultados?essayId=${encodeURIComponent(String(data[i].id))}`;
+                }
+              }}
+              onMouseEnter={() => setHoverIndex(i)}
+              onMouseLeave={() => setHoverIndex(null)}
+            />
           </g>
-        )}
+        ))}
       </svg>
 
       {/* tooltip */}
@@ -113,7 +130,7 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
 }
 
 export default function EvolucaoPage() {
-  const { user, isConfigured } = useAuth();
+  const { user, isConfigured, signOut } = useAuth();
   const [scores, setScores] = useState<Array<{ id: string; final_score: number | null; created_at: string; topic?: string | null }>>([]);
   const [loading, setLoading] = useState(false);
 
@@ -135,7 +152,7 @@ export default function EvolucaoPage() {
     load();
   }, [user, isConfigured]);
 
-  const dataPoints = useMemo(() => scores.map((s, i) => ({ label: s.topic || `Red ${i + 1}`, value: s.final_score } as DataPoint)), [scores]);
+  const dataPoints = useMemo(() => scores.map((s, i) => ({ id: s.id, label: s.topic || `Red ${i + 1}`, value: s.final_score } as DataPoint)), [scores]);
 
   const stats = useMemo(() => {
     const valid = scores.map(s => s.final_score ?? 0);
@@ -144,6 +161,11 @@ export default function EvolucaoPage() {
     return { avg: Math.round(sum / valid.length), min: Math.min(...valid), max: Math.max(...valid) };
   }, [scores]);
 
+  const handleSignOut = async () => {
+    await signOut();
+    window.location.href = '/';
+  };
+
   return (
     <ClientWrapper showFloatingMenu={false}>
       <div className="min-h-screen bg-background">
@@ -151,9 +173,34 @@ export default function EvolucaoPage() {
           <Sidebar />
           <div className="w-full">
             <div className="max-w-6xl px-6 py-8 mx-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold text-white">Evolução</h1>
+              {/* Header (same as Envio) */}
+              <div className="flex items-center p-6 mb-4">
+                <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+                  <Image src="/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
+                  <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
+                </div>
+                <button
+                  onClick={() => {
+                    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                    const next = current === 'dark' ? 'light' : 'dark';
+                    document.documentElement.setAttribute('data-theme', next);
+                    try { localStorage.setItem('reditto-theme', next); } catch {}
+                  }}
+                  className="ml-auto text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text"
+                  aria-label="Alternar tema"
+                >
+                  <Sun size={20} />
+                </button>
+                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-400 transition-colors p-2 rounded-full">
+                  Sair
+                </button>
               </div>
+
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold text-white">Evolução</h1>
+                <p className="text-gray-300 mt-2">Acompanhe a sua evolução de notas ao longo das redações. Passe o mouse sobre os pontos para ver a redação e clique para abrir o histórico.</p>
+              </div>
+
               <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
                 {loading ? (
                   <div className="text-gray-300">Carregando evolução...</div>
@@ -161,7 +208,7 @@ export default function EvolucaoPage() {
                   <div className="text-gray-300">Sem dados para exibir. Envie sua primeira redação!</div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="w-full overflow-hidden rounded-xl bg-gray-900/20 p-4 relative">
+                    <div className="w-full overflow-hidden rounded-xl p-4 relative evolution-chart">
                       <InteractiveLineChart data={dataPoints} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

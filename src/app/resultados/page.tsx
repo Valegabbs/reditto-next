@@ -16,17 +16,49 @@ export default function ResultadosPage() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const dataParam = urlParams.get('data');
-    
+    const essayId = urlParams.get('essayId');
+
+    const loadFromId = async (id: string) => {
+      try {
+        const { data: essay, error } = await supabase.from('essays').select('id, topic, essay_text, final_score, competencies, feedback, created_at').eq('id', id).single();
+        if (error) {
+          console.error('Erro ao buscar redação por id:', error);
+          setResult(getExampleData());
+          return;
+        }
+
+        const built = {
+          finalScore: essay.final_score,
+          competencies: essay.competencies ? JSON.parse(essay.competencies) : null,
+          feedback: essay.feedback ? JSON.parse(essay.feedback) : null,
+          originalEssay: essay.essay_text,
+          topic: essay.topic,
+          created_at: essay.created_at
+        };
+        setResult(built);
+      } catch (err) {
+        console.error('Erro ao carregar redação por id:', err);
+        setResult(getExampleData());
+      }
+    };
+
     if (dataParam) {
-      // Dados vindos da API de correção
+      // Dados vindos da API de correção (prioridade)
       try {
         const parsedData = JSON.parse(decodeURIComponent(dataParam));
         setResult(parsedData);
       } catch (error) {
         console.error('Erro ao parsear dados:', error);
-        // Fallback para dados de exemplo
-        setResult(getExampleData());
+        // Fallback: tentar carregar por essayId se fornecido
+        if (essayId) {
+          loadFromId(essayId);
+        } else {
+          setResult(getExampleData());
+        }
       }
+    } else if (essayId) {
+      // Carregar diretamente do banco usando o id
+      loadFromId(essayId);
     } else {
       // Sem parâmetros: mostrar dados de exemplo
       setResult(getExampleData());
