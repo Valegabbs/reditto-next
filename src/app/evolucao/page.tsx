@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import ClientWrapper from '../components/ClientWrapper';
 import Sidebar from '../components/Sidebar';
 import { supabase } from '@/lib/supabase';
@@ -11,30 +11,104 @@ import { useAuth } from '@/contexts/AuthContext';
 
 interface DataPoint { label: string; value: number | null; }
 
-function SimpleLineChart({ data }: { data: DataPoint[] }) {
-  const width = 700;
-  const height = 220;
-  const padding = 32;
+function InteractiveLineChart({ data }: { data: DataPoint[] }) {
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const width = 760;
+  const height = 300;
+  const padding = 48;
 
   const values = data.map(d => (d.value ?? 0));
-  const max = Math.max(...values, 100);
-  const min = Math.min(...values, 0);
+  const maxVal = Math.max(...values, 1000);
+  const minVal = 0;
+
+  // Y ticks fixed as requested
+  const yTicks = [200, 400, 600, 800, 1000];
+
+  const xCount = Math.max(1, data.length);
+  const xPositions = data.map((_, i) => padding + (i * (width - padding * 2)) / Math.max(1, xCount - 1));
 
   const points = data.map((d, i) => {
-    const x = padding + (i * (width - padding * 2)) / Math.max(1, data.length - 1);
-    const y = height - padding - ((d.value ?? 0) - min) / Math.max(1, (max - min)) * (height - padding * 2);
-    return `${x},${y}`;
-  }).join(' ');
+    const x = xPositions[i];
+    const y = height - padding - ((d.value ?? 0) - minVal) / Math.max(1, (maxVal - minVal)) * (height - padding * 2);
+    return { x, y };
+  });
+
+  const handleMove = (evt: React.MouseEvent) => {
+    if (!svgRef.current) return;
+    const rect = svgRef.current.getBoundingClientRect();
+    const mx = evt.clientX - rect.left;
+    // find nearest x
+    let nearest = 0;
+    let nearestDist = Infinity;
+    xPositions.forEach((x, i) => {
+      const d = Math.abs(x - mx);
+      if (d < nearestDist) { nearestDist = d; nearest = i; }
+    });
+    setHoverIndex(nearest);
+  };
+
+  const handleLeave = () => setHoverIndex(null);
+
+  // abbreviate x labels depending on count
+  const formatXLabel = (i: number) => {
+    if (xCount > 20) return `${i + 1}`;
+    if (xCount > 10) return `Red ${i + 1}`;
+    return `Redação ${i + 1}`;
+  };
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
-      <polyline fill="none" stroke="#8b5cf6" strokeWidth={3} strokeLinejoin="round" strokeLinecap="round" points={points} />
-      {data.map((d, i) => {
-        const x = padding + (i * (width - padding * 2)) / Math.max(1, data.length - 1);
-        const y = height - padding - ((d.value ?? 0) - min) / Math.max(1, (max - min)) * (height - padding * 2);
-        return <circle key={i} cx={x} cy={y} r={4} fill="#8b5cf6" />;
-      })}
-    </svg>
+    <div ref={containerRef} className="w-full overflow-x-auto">
+      <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" onMouseMove={handleMove} onMouseLeave={handleLeave}>
+        {/* grid lines and y axis labels */}
+        {yTicks.map((t, idx) => {
+          const y = height - padding - (t - minVal) / Math.max(1, (maxVal - minVal)) * (height - padding * 2);
+          return (
+            <g key={t}>
+              <line x1={padding} x2={width - padding} y1={y} y2={y} stroke="rgba(255,255,255,0.04)" strokeWidth={1} />
+              <text x={padding - 10} y={y + 4} textAnchor="end" className="text-xs fill-gray-400">{t}</text>
+            </g>
+          );
+        })}
+
+        {/* x labels */}
+        {xPositions.map((x, i) => (
+          <text key={i} x={x} y={height - 8} textAnchor="middle" className="text-xs fill-gray-400" style={{ transformOrigin: `${x}px ${height - 8}px` }}>{formatXLabel(i)}</text>
+        ))}
+
+        {/* polyline */}
+        <polyline
+          fill="none"
+          stroke="#8b5cf6"
+          strokeWidth={3}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          points={points.map(p => `${p.x},${p.y}`).join(' ')}
+        />
+
+        {/* filled area subtle */}
+        <polygon points={`${padding},${height - padding} ${points.map(p => `${p.x},${p.y}`).join(' ')} ${width - padding},${height - padding}`} fill="rgba(139,92,246,0.06)" />
+
+        {/* hover indicators */}
+        {hoverIndex !== null && points[hoverIndex] && (
+          <g>
+            <line x1={points[hoverIndex].x} x2={points[hoverIndex].x} y1={padding} y2={height - padding} stroke="rgba(255,255,255,0.06)" />
+            <circle cx={points[hoverIndex].x} cy={points[hoverIndex].y} r={6} fill="#fff" stroke="#8b5cf6" strokeWidth={2} />
+          </g>
+        )}
+      </svg>
+
+      {/* tooltip */}
+      {hoverIndex !== null && points[hoverIndex] && (
+        <div className="absolute pointer-events-none z-50" style={{ transform: 'translateY(-100%)' }}>
+          <div className="bg-black/80 text-white text-sm px-3 py-2 rounded-lg shadow-lg">
+            <div className="font-semibold">{formatXLabel(hoverIndex)}</div>
+            <div className="text-xs text-gray-200">{data[hoverIndex].value ?? '—'}</div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -76,7 +150,7 @@ export default function EvolucaoPage() {
         <div className="flex">
           <Sidebar />
           <div className="w-full">
-            <div className="max-w-5xl px-6 py-8 mx-auto">
+            <div className="max-w-6xl px-6 py-8 mx-auto">
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-3xl font-bold text-white">Evolução</h1>
               </div>
@@ -87,19 +161,19 @@ export default function EvolucaoPage() {
                   <div className="text-gray-300">Sem dados para exibir. Envie sua primeira redação!</div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="w-full overflow-hidden rounded-xl bg-gray-900/20 p-4">
-                      <SimpleLineChart data={dataPoints} />
+                    <div className="w-full overflow-hidden rounded-xl bg-gray-900/20 p-4 relative">
+                      <InteractiveLineChart data={dataPoints} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 rounded-lg panel-base">
+                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-purple-700/10 to-purple-700/5">
                         <div className="text-sm text-gray-400">Média</div>
                         <div className="text-2xl font-semibold text-white">{stats.avg ?? '—'}</div>
                       </div>
-                      <div className="p-4 rounded-lg panel-base">
+                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-red-600/8 to-red-600/4">
                         <div className="text-sm text-gray-400">Pior Nota</div>
                         <div className="text-2xl font-semibold text-white">{stats.min ?? '—'}</div>
                       </div>
-                      <div className="p-4 rounded-lg panel-base">
+                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-green-600/8 to-green-600/4">
                         <div className="text-sm text-gray-400">Melhor Nota</div>
                         <div className="text-2xl font-semibold text-white">{stats.max ?? '—'}</div>
                       </div>
