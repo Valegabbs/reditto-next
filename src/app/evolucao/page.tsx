@@ -168,7 +168,7 @@ export default function EvolucaoPage() {
 
   return (
     <ClientWrapper showFloatingMenu={false}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background bg-dot-grid">
         <div className="flex">
           <Sidebar />
           <div className="w-full">
