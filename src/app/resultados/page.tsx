@@ -182,7 +182,7 @@ export default function ResultadosPage() {
   if (!result) {
     return (
       <ClientWrapper>
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="min-h-screen bg-background bg-dot-grid flex items-center justify-center">
           <div className="text-white text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
             <p>Carregando resultados...</p>
@@ -194,7 +194,7 @@ export default function ResultadosPage() {
 
   return (
     <ClientWrapper showFloatingMenu={false}>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background bg-dot-grid">
 
       {/* Header (copiado da página de envio) */}
       <div className="flex items-center p-6 max-w-6xl mx-auto">

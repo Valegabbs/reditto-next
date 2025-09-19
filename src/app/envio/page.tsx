@@ -78,7 +78,7 @@ export default function EnvioPage() {
   return (
     <ClientWrapper showFloatingMenu={false}>
       <FrameLoadingOverlay visible={isLoading} />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background bg-dot-grid">
         <div className="flex">
           <Sidebar />
 

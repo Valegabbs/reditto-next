@@ -344,4 +344,15 @@ body {
   [data-theme="light"] .sidebar-toggle-button {
     @apply bg-white/90 text-gray-700 hover:bg-gray-100 border border-gray-200;
   }
+
+  /* Subtle dot grid background for contrast on main pages */
+  .bg-dot-grid {
+    background-image: radial-gradient(circle, var(--dot-color, rgba(148,163,184,0.12)) 1px, transparent 1.5px);
+    background-size: 24px 24px;
+    background-position: center;
+  }
+
+  /* Theme-aware dot color to keep near-background tone */
+  [data-theme="dark"] .bg-dot-grid { --dot-color: rgba(148,163,184,0.12); }
+  [data-theme="light"] .bg-dot-grid { --dot-color: rgba(15,19,28,0.06); }
 }
