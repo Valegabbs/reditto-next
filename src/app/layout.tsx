@@ -10,10 +10,10 @@ export const metadata: Metadata = {
   description: "Plataforma de correção de redações",
     icons: {
     icon: [
-      { url: '/logo.PNG?v=2', type: 'image/png' },
+      { url: '/assets/logo.PNG?v=2', type: 'image/png' },
     ],
-    shortcut: ['/logo.PNG?v=2'],
-    apple: ['/logo.PNG?v=2'],
+    shortcut: ['/assets/logo.PNG?v=2'],
+    apple: ['/assets/logo.PNG?v=2'],
   },
 };
 
