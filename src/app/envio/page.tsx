@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun } from 'lucide-react';
 import Image from 'next/image';
+import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
 import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
 import Sidebar from '../components/Sidebar';
@@ -58,6 +59,8 @@ export default function EnvioPage() {
         throw new Error(errorData.error || 'Falha ao processar a redação');
       }
       const result = await response.json();
+      // Encerrar animação antes de redirecionar
+      setIsLoading(false);
       // Redirecionar diretamente para a página de resultados
       window.location.href = `/resultados?data=${encodeURIComponent(JSON.stringify(result))}`;
     } catch (error) {
@@ -74,6 +77,7 @@ export default function EnvioPage() {
 
   return (
     <ClientWrapper showFloatingMenu={false}>
+      <FrameLoadingOverlay visible={isLoading} />
       <div className="min-h-screen bg-background">
         <div className="flex">
           <Sidebar />
