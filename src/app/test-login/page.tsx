@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function TestLoginPage() {
@@ -57,6 +58,15 @@ export default function TestLoginPage() {
   return (
     <div className="min-h-screen bg-gray-900 p-8">
       <div className="max-w-2xl mx-auto">
+        <div className="flex items-center justify-end mb-4">
+          <button 
+            onClick={() => { window.location.href = '/envio'; }}
+            className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+            aria-label="Ir para envio"
+          >
+            <ArrowLeft size={18} />
+          </button>
+        </div>
         <h1 className="text-3xl font-bold text-white mb-8">Teste de Login</h1>
         
         {/* Status */}
