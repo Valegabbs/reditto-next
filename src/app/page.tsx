@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Sun, Users, Mail, Eye, EyeOff, User } from 'lucide-react';
+import { Sun, Users, Mail, Eye, EyeOff, User, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from './components/ClientWrapper';
 import Disclaimer from './components/Disclaimer';
@@ -124,13 +124,22 @@ export default function HomePage() {
             <Image src="/assets/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
             <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
           </div>
-          <button 
-            onClick={handleThemeToggle} 
-            className="ml-auto text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
-            aria-label="Alternar tema"
-          >
-            <Sun size={20} />
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            <button 
+              onClick={() => { window.location.href = '/envio'; }}
+              className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+              aria-label="Ir para envio"
+            >
+              <ArrowLeft size={18} />
+            </button>
+            <button 
+              onClick={handleThemeToggle} 
+              className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
+              aria-label="Alternar tema"
+            >
+              <Sun size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Main Content */}

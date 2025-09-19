@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun } from 'lucide-react';
+import { FileText, CheckCircle, AlertTriangle, Lightbulb, Printer, Brain, Award, TrendingUp, Target, Sun, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
@@ -204,6 +204,13 @@ export default function ResultadosPage() {
           <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
         </div>
         <div className="ml-auto flex items-center gap-3">
+          <button 
+            onClick={() => { window.location.href = '/envio'; }}
+            className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+            aria-label="Voltar"
+          >
+            <ArrowLeft size={18} />
+          </button>
           <button 
             onClick={() => {
               const current = document.documentElement.getAttribute('data-theme') || 'dark';

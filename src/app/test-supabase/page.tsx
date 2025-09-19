@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { supabase, isSupabaseConfigured, testSupabaseConnection } from '@/lib/supabase';
 
 export default function SupabaseTest() {
@@ -63,6 +64,15 @@ export default function SupabaseTest() {
 
   return (
     <div className="p-6 bg-gray-800 rounded-lg">
+      <div className="flex items-center justify-end mb-4">
+        <button 
+          onClick={() => { window.location.href = '/envio'; }}
+          className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+          aria-label="Ir para envio"
+        >
+          <ArrowLeft size={18} />
+        </button>
+      </div>
       <h2 className="text-xl font-bold text-white mb-4">Teste do Supabase</h2>
       
       <button
