@@ -100,11 +100,85 @@ export async function callN8nWebhook(payload: N8nRequest): Promise<N8nResponse> 
 
     const data = await response.json();
     console.log('✅ Resposta recebida do n8n');
-    console.log('📄 Estrutura da resposta:', Object.keys(data));
+    console.log('📄 Estrutura da resposta (raw):', Object.keys(data));
+
+    // Normalizar possíveis formatos de resposta do n8n para o formato esperado pelo frontend
+    let normalized: any = data;
+
+    try {
+      // Caso 1: array de items com .json (ex.: [{ json: {...} }])
+      if (Array.isArray(normalized) && normalized.length > 0 && normalized[0].json) {
+        normalized = normalized[0].json;
+        console.log('🔁 Normalized from array[0].json');
+      }
+
+      // Caso 2: envelope comum { success: true, data: {...} }
+      if (normalized && typeof normalized === 'object' && normalized.data && typeof normalized.data === 'object' && (normalized.data.finalScore || normalized.data.competencies || normalized.data.feedback)) {
+        normalized = normalized.data;
+        console.log('🔁 Normalized from envelope.data');
+      }
+
+      // Caso 3: payload dentro de 'output' ou 'result'
+      if (normalized && typeof normalized === 'object' && normalized.output && typeof normalized.output === 'object' && (normalized.output.finalScore || normalized.output.competencies || normalized.output.feedback)) {
+        normalized = normalized.output;
+        console.log('🔁 Normalized from output');
+      }
+      if (normalized && typeof normalized === 'object' && normalized.result && typeof normalized.result === 'object' && (normalized.result.finalScore || normalized.result.competencies || normalized.result.feedback)) {
+        normalized = normalized.result;
+        console.log('🔁 Normalized from result');
+      }
+
+      // Caso 4: string JSON
+      if (typeof normalized === 'string') {
+        try {
+          const parsed = JSON.parse(normalized);
+          normalized = parsed;
+          console.log('🔁 Parsed JSON string to object');
+        } catch (e) {
+          // não alterar se não for JSON
+        }
+      }
+
+      // Se for resposta de OCR (extractedText), manter como está
+      if (normalized && typeof normalized === 'object' && Object.prototype.hasOwnProperty.call(normalized, 'extractedText')) {
+        // manter intacto
+      } else {
+        // Coerções simples de tipo para o formato esperado pela UI
+        if (normalized && normalized.finalScore && typeof normalized.finalScore === 'string') {
+          const n = Number(normalized.finalScore.toString().replace(/[^0-9.-]/g, ''));
+          normalized.finalScore = Number.isFinite(n) ? n : normalized.finalScore;
+        }
+
+        if (normalized && normalized.competencies && typeof normalized.competencies === 'object') {
+          for (const k of Object.keys(normalized.competencies)) {
+            const v = normalized.competencies[k];
+            if (typeof v === 'string') {
+              const num = Number(v.toString().replace(/[^0-9.-]/g, ''));
+              normalized.competencies[k] = Number.isFinite(num) ? num : v;
+            }
+          }
+        }
+
+        // Garantir estrutura mínima de feedback
+        if (!normalized.feedback) {
+          normalized.feedback = { summary: '', improvements: [], attention: [], congratulations: [], competencyFeedback: {} };
+        } else {
+          normalized.feedback.summary = normalized.feedback.summary ?? '';
+          normalized.feedback.improvements = Array.isArray(normalized.feedback.improvements) ? normalized.feedback.improvements : [];
+          normalized.feedback.attention = Array.isArray(normalized.feedback.attention) ? normalized.feedback.attention : [];
+          normalized.feedback.congratulations = Array.isArray(normalized.feedback.congratulations) ? normalized.feedback.congratulations : [];
+          normalized.feedback.competencyFeedback = normalized.feedback.competencyFeedback && typeof normalized.feedback.competencyFeedback === 'object' ? normalized.feedback.competencyFeedback : {};
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Erro ao normalizar resposta do n8n:', err);
+    }
+
+    console.log('📄 Estrutura da resposta (normalized):', normalized && typeof normalized === 'object' ? Object.keys(normalized) : typeof normalized);
 
     return {
       success: true,
-      data
+      data: normalized
     };
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
