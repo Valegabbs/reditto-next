@@ -112,13 +112,13 @@ export default function HistoricoPage() {
                       document.documentElement.setAttribute('data-theme', next);
                       try { localStorage.setItem('reditto-theme', next); } catch {}
                     }}
-                    className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text"
+                    className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text"
                     aria-label="Alternar tema"
                   >
                     <Sun size={20} />
                   </button>
                 </div>
-                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-400 transition-colors p-2 rounded-full">
+                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-300 transition-colors px-3 py-1.5 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60">
                   Sair
                 </button>
               </div>

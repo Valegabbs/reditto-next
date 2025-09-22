@@ -159,12 +159,12 @@
 
 /* Light theme variables (toggle via data-theme attribute) */
 :root[data-theme="light"] {
-  --background: #f1f3f4;
-  --foreground: #374151;
+  --background: #e5e7eb;
+  --foreground: #111827;
   --primary: #7c3aed;
   --primary-foreground: #ffffff;
   --secondary: #ffffff;
-  --secondary-foreground: #374151;
+  --secondary-foreground: #111827;
   --accent: #4f46e5;
   --accent-foreground: #ffffff;
   --destructive: #e11d48;
@@ -324,6 +324,16 @@ body {
     @apply text-gray-600 bg-gray-100 border border-gray-200 hover:bg-gray-200;
   }
 
+  /* Light theme: stronger contrast for inactive sidebar buttons */
+  [data-theme="light"] .sidebar-button-inactive {
+    color: #0f172a; /* slate-900 */
+    background: #f1f5f9; /* slate-100 */
+    border-color: #cbd5e1; /* slate-300 */
+  }
+  [data-theme="light"] .sidebar-button-inactive:hover {
+    background: #e2e8f0; /* slate-200 */
+  }
+
   /* Dark theme sidebar buttons (default) */
   .sidebar-button-active {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 55%, #6d28d9 100%);
@@ -335,14 +345,35 @@ body {
     @apply text-gray-300 border bg-gray-800/30 border-gray-600/40 hover:bg-gray-700/40;
   }
 
+  /* Light theme: sidebar container and drawer contrast improvements */
+  [data-theme="light"] .sidebar-container {
+    background: #ffffff; /* solid white for clarity */
+    border-color: #e5e7eb; /* gray-200 */
+  }
+  [data-theme="light"] .sidebar-drawer {
+    background: rgba(255,255,255,0.98);
+    border-color: #e5e7eb;
+  }
+
   /* Sidebar toggle button */
   .sidebar-toggle-button {
     @apply text-white bg-gray-800/80 hover:bg-gray-700/40;
   }
 
-  /* Light theme sidebar toggle button */
+  /* Light theme sidebar toggle button - higher contrast */
   [data-theme="light"] .sidebar-toggle-button {
-    @apply text-gray-700 border border-gray-200 bg-white/90 hover:bg-gray-100;
+    color: #0f172a; /* slate-900 */
+    background: #ffffff; /* solid white for clarity */
+    border: 1px solid #94a3b8; /* slate-400 */
+    box-shadow: 0 1px 0 rgba(0,0,0,0.03), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  [data-theme="light"] .sidebar-toggle-button:hover {
+    background: #e5e7eb; /* gray-200 */
+    border-color: #64748b; /* slate-500 */
+  }
+  [data-theme="light"] .sidebar-toggle-button:focus-visible {
+    outline: 2px solid #7c3aed; /* primary */
+    outline-offset: 2px;
   }
 
   /* Subtle dot grid background for contrast on main pages */
@@ -355,4 +386,31 @@ body {
   /* Theme-aware dot color to keep near-background tone */
   [data-theme="dark"] .bg-dot-grid { --dot-color: rgba(162, 176, 195, 0.12); }
   [data-theme="light"] .bg-dot-grid { --dot-color: rgba(3, 3, 3, 0.24); }
+}
+
+/* ---------------------------------------------
+   Light theme high-contrast tweaks (darker)
+   - Stronger secondary text and labels
+   - Darker inactive sidebar buttons
+---------------------------------------------- */
+[data-theme="light"] .text-gray-400 { color: #1f2937; }
+[data-theme="light"] .text-gray-300 { color: #374151; }
+[data-theme="light"] .header-text { color: #111827; }
+
+/* Chart labels more legible on light */
+[data-theme="light"] .x-label { fill: rgba(15,23,42,0.85); }
+
+/* Sidebar buttons even darker for contrast */
+[data-theme="light"] .sidebar-button-inactive {
+  color: #0b1220;
+  background: #cbd5e1; /* slate-300 */
+  border-color: #94a3b8; /* slate-400 */
+}
+[data-theme="light"] .sidebar-button-inactive:hover { background: #94a3b8; }
+
+/* Welcome message: increase contrast only on light mode */
+[data-theme="light"] .welcome-message {
+  color: #7328e2; /* much darker purple for high contrast */
+  font-weight: 600;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 0 1px rgba(0,0,0,0.35);
 }

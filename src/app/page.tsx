@@ -134,7 +134,7 @@ export default function HomePage() {
             </button>
             <button 
               onClick={handleThemeToggle} 
-              className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
+              className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
               aria-label="Alternar tema"
             >
               <Sun size={20} />

@@ -94,7 +94,7 @@ export default function Sidebar() {
       </button>
 
       {/* Desktop sidebar */}
-  <aside className={`hidden md:block sticky top-0 h-screen border-r backdrop-blur-sm border-gray-700/50 bg-gray-800/10 transition-all duration-300 ${
+  <aside className={`sidebar-container hidden md:block sticky top-0 h-screen border-r backdrop-blur-sm border-gray-700/50 bg-gray-800/10 transition-all duration-300 ${
         collapsed ? 'p-2 w-16' : 'p-6 w-72'
       }`}>
         <div className={`flex flex-col gap-4 mt-16 ${collapsed ? 'items-center' : 'items-center'}`}>
@@ -126,7 +126,7 @@ export default function Sidebar() {
       {isMobileOpen && (
         <div className="md:hidden fixed inset-0 z-40" aria-modal="true" role="dialog">
           <div className="absolute inset-0 bg-black/50" onClick={() => setIsMobileOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 p-6 border-r backdrop-blur-sm border-gray-700/50 bg-gray-900/90">
+          <div className="sidebar-drawer absolute left-0 top-0 bottom-0 w-72 p-6 border-r backdrop-blur-sm border-gray-700/50 bg-gray-900/90">
             <div className="space-y-3 w-full mt-12">
               <Button href="/envio" icon={<Home size={18} />} label="Início" title="Início" />
               <Button href="/historico" icon={<History size={18} />} label="Histórico" title="Histórico" />
