@@ -17,6 +17,8 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [lockedIndex, setLockedIndex] = useState<number | null>(null);
+  const [tooltipPos, setTooltipPos] = useState<{ left: number; top: number } | null>(null);
   const width = 760;
   const height = 300;
   const padding = 48;
@@ -39,8 +41,16 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
 
   const handleMove = (evt: React.MouseEvent) => {
     if (!svgRef.current) return;
+    // Travado em um ponto? Não recalcular o índice
+    if (lockedIndex !== null) {
+      setHoverIndex(lockedIndex);
+      return;
+    }
+
     const rect = svgRef.current.getBoundingClientRect();
-    const mx = evt.clientX - rect.left;
+    // Converter coordenada do mouse (px) para o sistema do viewBox
+    const scaleX = width / Math.max(1, rect.width);
+    const mx = (evt.clientX - rect.left) * scaleX;
     // find nearest x
     let nearest = 0;
     let nearestDist = Infinity;
@@ -51,7 +61,7 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
     setHoverIndex(nearest);
   };
 
-  const handleLeave = () => setHoverIndex(null);
+  const handleLeave = () => { setHoverIndex(null); setLockedIndex(null); setTooltipPos(null); };
 
   // abbreviate x labels depending on count
   const formatXLabel = (i: number) => {
@@ -61,7 +71,7 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
   };
 
   return (
-    <div ref={containerRef} className="w-full overflow-x-auto">
+    <div ref={containerRef} className="relative w-full overflow-x-auto">
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" onMouseMove={handleMove} onMouseLeave={handleLeave}>
         {/* grid lines and y axis labels */}
         {yTicks.map((t, idx) => {
@@ -109,21 +119,36 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
                   window.location.href = `/resultados?essayId=${encodeURIComponent(String(data[i].id))}`;
                 }
               }}
-              onMouseEnter={() => setHoverIndex(i)}
-              onMouseLeave={() => setHoverIndex(null)}
+              onMouseEnter={() => {
+                setLockedIndex(i);
+                setHoverIndex(i);
+              }}
+              onMouseLeave={() => {
+                setLockedIndex(null);
+              }}
             />
           </g>
         ))}
       </svg>
 
       {/* tooltip */}
-      {hoverIndex !== null && points[hoverIndex] && (
-        <div className="absolute pointer-events-none z-50" style={{ transform: 'translateY(-100%)' }}>
-          <div className="bg-black/80 text-white text-sm px-3 py-2 rounded-lg shadow-lg">
-            <div className="font-semibold">{formatXLabel(hoverIndex)}</div>
-            <div className="text-xs text-gray-200">{data[hoverIndex].value ?? '—'}</div>
-          </div>
-        </div>
+      {hoverIndex !== null && points[hoverIndex] && svgRef.current && (
+        (() => {
+          const rect = svgRef.current!.getBoundingClientRect();
+          const scaleX = rect.width / width;
+          const scaleY = rect.height / height;
+          const p = points[hoverIndex];
+          const left = p.x * scaleX;
+          const top = p.y * scaleY;
+          return (
+            <div className="absolute pointer-events-none z-50" style={{ left, top, transform: 'translate(-50%, calc(-100% - 16px))' }}>
+              <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg border border-black/20 whitespace-nowrap">
+                <div className="font-semibold">{formatXLabel(hoverIndex)}</div>
+                <div className="text-xs text-gray-200">{data[hoverIndex].value ?? '—'}</div>
+              </div>
+            </div>
+          );
+        })()
       )}
     </div>
   );
@@ -194,13 +219,13 @@ export default function EvolucaoPage() {
                       document.documentElement.setAttribute('data-theme', next);
                       try { localStorage.setItem('reditto-theme', next); } catch {}
                     }}
-                    className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text"
+                    className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text"
                     aria-label="Alternar tema"
                   >
                     <Sun size={20} />
                   </button>
                 </div>
-                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-400 transition-colors p-2 rounded-full">
+                <button onClick={handleSignOut} className="ml-2 text-white hover:text-red-300 transition-colors px-3 py-1.5 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60">
                   Sair
                 </button>
               </div>

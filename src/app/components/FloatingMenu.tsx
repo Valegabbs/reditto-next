@@ -33,7 +33,7 @@ export default function FloatingMenu({ onLogout }: { onLogout?: () => void }) {
       </div>
       <button 
         onClick={toggleTheme} 
-        className="p-2 rounded-full bg-blue-500/20 hover:bg-blue-500/30 transition-colors border border-blue-400/50"
+        className="p-2 rounded-full transition-colors border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60"
         aria-label="Alternar tema"
       >
         {theme === 'dark' ? <Sun size={16} className="text-blue-300" /> : <Moon size={16} className="text-blue-600" />}
@@ -41,7 +41,7 @@ export default function FloatingMenu({ onLogout }: { onLogout?: () => void }) {
       {onLogout && (
         <button 
           onClick={onLogout} 
-          className="text-white/90 hover:text-white transition-colors px-3 py-1 rounded-full hover:bg-white/10"
+          className="text-white/90 hover:text-white transition-colors px-3 py-1.5 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60"
         >
           Sair
         </button>

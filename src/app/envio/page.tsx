@@ -101,14 +101,14 @@ export default function EnvioPage() {
                   document.documentElement.setAttribute('data-theme', next);
                   try { localStorage.setItem('reditto-theme', next); } catch {}
                 }} 
-                className="p-2 text-white rounded-full backdrop-blur-sm transition-colors hover:text-yellow-400 hover:bg-gray-800/20 header-text" 
+                className="p-2 text-white rounded-full transition-colors hover:text-yellow-400 border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
                 aria-label="Alternar tema"
               >
                 <Sun size={20} />
               </button>
               <button 
                 onClick={handleSignOut} 
-                className="flex gap-1 items-center text-sm text-white transition-colors header-text hover:text-red-400"
+                className="flex gap-1 items-center text-sm text-white transition-colors header-text hover:text-red-300 px-3 py-1.5 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
@@ -126,7 +126,7 @@ export default function EnvioPage() {
                 Digite o tema e o texto ou envie uma foto da sua redação
               </p>
               {user && (
-                <p className="mt-2 text-sm text-purple-400">
+                <p className="mt-2 text-sm text-purple-400 welcome-message">
                   Olá, {user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]}! Bem-vindo ao Reditto.
                 </p>
               )}

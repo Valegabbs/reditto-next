@@ -218,14 +218,14 @@ export default function ResultadosPage() {
               document.documentElement.setAttribute('data-theme', next);
               try { localStorage.setItem('reditto-theme', next); } catch {}
             }} 
-            className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full hover:bg-gray-800/20 backdrop-blur-sm header-text" 
+            className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
             aria-label="Alternar tema"
           >
             <Sun size={20} />
           </button>
           <button 
             onClick={handleSignOut} 
-            className="header-text text-white hover:text-red-400 transition-colors flex items-center gap-1 text-sm"
+            className="header-text text-white hover:text-red-300 transition-colors flex items-center gap-1 text-sm px-3 py-1.5 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60"
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15m-3 0-3-3m0 0 3-3m-3 3H15" />
