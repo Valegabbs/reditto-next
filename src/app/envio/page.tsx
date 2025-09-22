@@ -39,7 +39,8 @@ export default function EnvioPage() {
       if (submissionType === 'image' && selectedImage) {
         const ocrFormData = new FormData();
         ocrFormData.append('image', selectedImage);
-        const ocrResponse = await fetch('/api/extract-text', { method: 'POST', body: ocrFormData });
+        // Usando o novo endpoint de extração de texto com n8n
+        const ocrResponse = await fetch('/api/extract-text-n8n', { method: 'POST', body: ocrFormData });
         if (!ocrResponse.ok) {
           const errorData = await ocrResponse.json().catch(() => ({ error: 'Erro no OCR' }));
           throw new Error(errorData.error || 'Falha ao extrair texto da imagem');
@@ -53,7 +54,8 @@ export default function EnvioPage() {
       const correctionFormData = new FormData();
       correctionFormData.append('topic', topic || '');
       correctionFormData.append('essayText', finalEssayText || '');
-      const response = await fetch('/api/correct-essay', { method: 'POST', body: correctionFormData });
+      // Usando o novo endpoint de integração com n8n
+      const response = await fetch('/api/n8n-correction', { method: 'POST', body: correctionFormData });
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
         throw new Error(errorData.error || 'Falha ao processar a redação');
