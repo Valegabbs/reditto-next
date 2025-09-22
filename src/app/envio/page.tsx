@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun } from 'lucide-react';
+import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
 import ClientWrapper from '../components/ClientWrapper';
@@ -31,6 +31,13 @@ export default function EnvioPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!topic.trim()) {
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
+      try { document.getElementById('topic-input')?.focus(); } catch {}
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -144,10 +151,11 @@ export default function EnvioPage() {
                 {/* Topic Field */}
                 <div>
                   <label className="block mb-2 font-medium text-white">
-                    Tema da redação (opcional)
+                    Tema da redação
                   </label>
                   <input
                     type="text"
+                    id="topic-input"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
                     placeholder="Ex: A importância da educação digital no Brasil"
@@ -297,6 +305,24 @@ export default function EnvioPage() {
             </div>
           </main>
           <Disclaimer />
+          {/* Botão de aviso flutuante quando o tema não está preenchido */}
+          {!topic.trim() && (
+            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+              <button
+                type="button"
+                onClick={() => {
+                  try { document.getElementById('topic-input')?.focus(); } catch {}
+                  window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
+                }}
+                className="flex items-center gap-2 px-5 py-3 rounded-full shadow-lg border backdrop-blur-sm bg-yellow-900/30 border-yellow-500/40 text-yellow-200 hover:bg-yellow-900/40 transition-colors"
+                aria-label="Aviso: tema da redação não preenchido"
+              
+              >
+                <AlertTriangle size={18} className="text-yellow-300" />
+                <span className="font-medium">Falta o tema da redação</span>
+              </button>
+            </div>
+          )}
           </div>
         </div>
       </div>

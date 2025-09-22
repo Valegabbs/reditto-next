@@ -87,7 +87,7 @@ export default function ClientWrapper({
             toast.type === 'error' ? 'bg-red-900/30 border-red-500/40 text-red-200' : toast.type === 'success' ? 'bg-green-900/30 border-green-500/40 text-green-200' : 'bg-yellow-900/30 border-yellow-500/40 text-yellow-200'
           }`}>
             <div className="flex items-start gap-3">
-              <span className="font-medium">{toast.type === 'error' ? 'Erro' : toast.type === 'success' ? 'Sucesso' : 'Informação'}</span>
+              <span className="font-medium">{toast.type === 'error' ? 'Erro' : toast.type === 'success' ? 'Sucesso' : 'Aviso'}</span>
               <button onClick={() => setToast(null)} className="ml-auto text-white/70 hover:text-white">✕</button>
             </div>
             <div className="text-sm mt-1">{toast.message}</div>
