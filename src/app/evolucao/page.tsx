@@ -142,7 +142,7 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
           const top = p.y * scaleY;
           return (
             <div className="absolute pointer-events-none z-50" style={{ left, top, transform: 'translate(-50%, calc(-100% - 16px))' }}>
-              <div className="bg-black/80 text-white text-sm px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
+              <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg border border-black/20 whitespace-nowrap">
                 <div className="font-semibold">{formatXLabel(hoverIndex)}</div>
                 <div className="text-xs text-gray-200">{data[hoverIndex].value ?? '—'}</div>
               </div>
