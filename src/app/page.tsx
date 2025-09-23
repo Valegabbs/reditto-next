@@ -1,7 +1,7 @@
-'use client';
+	'use client';
 
-import { useState } from 'react';
-import { Sun, Users, Mail, Eye, EyeOff, User, ArrowLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Sun, Users, Mail, Eye, EyeOff, User } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from './components/ClientWrapper';
 import Disclaimer from './components/Disclaimer';
@@ -28,6 +28,13 @@ export default function HomePage() {
     } catch {}
     (window as any).__reditto_toast_timer = window.setTimeout(() => setToast(null), 4000);
   };
+
+  useEffect(() => {
+    try {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      setIsDarkMode(current === 'dark');
+    } catch {}
+  }, []);
 
   const handleThemeToggle = () => {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -90,9 +97,9 @@ export default function HomePage() {
   if (loading) {
     return (
       <ClientWrapper showFloatingMenu={false}>
-        <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex justify-center items-center min-h-screen bg-background">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <div className="mx-auto mb-4 w-12 h-12 rounded-full border-b-2 border-purple-500 animate-spin"></div>
             <p className="text-white">Carregando...</p>
           </div>
         </div>
@@ -102,39 +109,32 @@ export default function HomePage() {
 
   return (
     <ClientWrapper showFloatingMenu={false}>
-      <div className="min-h-screen bg-background">
+      <div className="overflow-hidden relative min-h-screen bg-background bg-dot-grid">
         {/* Toast */}
         {toast && (
           <div className="fixed top-4 right-4 z-50">
             <div className={`px-4 py-3 rounded-lg shadow-lg border backdrop-blur-sm ${
               toast.type === 'error' ? 'bg-red-900/30 border-red-500/40 text-red-200' : toast.type === 'success' ? 'bg-green-900/30 border-green-500/40 text-green-200' : 'bg-yellow-900/30 border-yellow-500/40 text-yellow-200'
             }`}>
-              <div className="flex items-start gap-3">
+              <div className="flex gap-3 items-start">
                 <span className="font-medium">{toast.type === 'error' ? 'Aviso' : toast.type === 'success' ? 'Sucesso' : 'Informação'}</span>
                 <button onClick={() => setToast(null)} className="ml-auto text-white/70 hover:text-white">✕</button>
               </div>
-              <div className="text-sm mt-1">{toast.message}</div>
+              <div className="mt-1 text-sm">{toast.message}</div>
             </div>
           </div>
         )}
         {/* Header */}
-        <div className="flex items-center p-6 max-w-6xl mx-auto">
+        <div className="flex items-center p-6 mx-auto max-w-6xl">
           {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
-          <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+          <div className="hidden gap-2 items-center px-4 py-2 rounded-full border backdrop-blur-sm md:flex header-item bg-gray-800/20 border-gray-700/50">
             <Image src="/assets/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
-            <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
+            <span className="text-sm font-medium header-text text-white/90">Correção de Redação para Todos!</span>
           </div>
-          <div className="ml-auto flex items-center gap-3">
-            <button 
-              onClick={() => { window.location.href = '/envio'; }}
-              className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
-              aria-label="Ir para envio"
-            >
-              <ArrowLeft size={18} />
-            </button>
+          <div className="flex gap-3 items-center ml-auto">
             <button 
               onClick={handleThemeToggle} 
-              className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
+              className="p-2 text-white rounded-full border transition-colors hover:text-yellow-400 border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
               aria-label="Alternar tema"
             >
               <Sun size={20} />
@@ -143,17 +143,17 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <main className="max-w-md mx-auto px-6 py-12">
-          <div className="text-center mb-8">
+        <main className="px-6 py-12 mx-auto max-w-md">
+          <div className="mb-8 text-center">
             <Image src="/assets/logo.PNG" alt="Reditto Logo" width={80} height={80} className="mx-auto mb-4" />
-            <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo ao Reditto</h1>
+            <h1 className="mb-2 text-3xl font-bold text-white">Bem-vindo ao Reditto</h1>
             <p className="text-gray-300">
               Sua plataforma inteligente para correção de redações
             </p>
             
             {!isConfigured && (
-              <div className="mt-4 p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
-                <p className="text-red-400 text-sm">
+              <div className="p-4 mt-4 rounded-lg border bg-red-900/20 border-red-600/30">
+                <p className="text-sm text-red-400">
                   ❌ <strong>Erro de Configuração:</strong> Sistema de autenticação não está funcionando. Entre em contato com o suporte.
                 </p>
               </div>
@@ -163,7 +163,7 @@ export default function HomePage() {
           {!showLogin ? (
             <>
               {/* Botões de Conta */}
-              <div className="space-y-3 mb-6">
+              <div className="mb-6 space-y-3">
                 <button
                   onClick={handleCreateAccount}
                   disabled={!isConfigured}
@@ -183,17 +183,17 @@ export default function HomePage() {
               </div>
 
               {/* Seção de Visitante */}
-              <div className="main-form rounded-2xl p-4">
-                <h3 className="text-white font-medium mb-1 text-center">Testar sem cadastro</h3>
-                <p className="text-gray-300 text-sm mb-3 text-center">
+              <div className="p-4 rounded-2xl main-form">
+                <h3 className="mb-1 font-medium text-center text-white">Testar sem cadastro</h3>
+                <p className="mb-3 text-sm text-center text-gray-300">
                   Experimente todas as funcionalidades
                 </p>
-                <p className="text-yellow-400 text-xs mb-3 text-center">
+                <p className="mb-3 text-xs text-center text-yellow-400">
                   ⚠️ Modo visitante: crie uma conta para poder ter acesso ao seu histórico de redações e evoluções
                 </p>
                 <button
                   onClick={handleGuestAccess}
-                  className="w-full btn-secondary justify-center"
+                  className="justify-center w-full btn-secondary"
                 >
                   <User size={20} />
                   Entrar como visitante
@@ -202,12 +202,12 @@ export default function HomePage() {
             </>
           ) : (
             /* Formulário de Login/Registro */
-            <div className="main-form rounded-2xl p-6">
-              <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-white mb-2">
+            <div className="p-6 rounded-2xl main-form">
+              <div className="mb-6 text-center">
+                <h2 className="mb-2 text-2xl font-bold text-white">
                   {isLogin ? 'Entrar' : 'Criar Conta'}
                 </h2>
-                <p className="text-gray-300 text-sm">
+                <p className="text-sm text-gray-300">
                   {isLogin ? 'Acesse sua conta' : 'Crie sua conta gratuita'}
                 </p>
               </div>
@@ -215,7 +215,7 @@ export default function HomePage() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 {!isLogin && (
                   <div>
-                    <label className="block text-white font-medium mb-2">
+                    <label className="block mb-2 font-medium text-white">
                       Seu Nome
                     </label>
                     <input
@@ -224,14 +224,14 @@ export default function HomePage() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Seu nome"
-                      className="input-field w-full"
+                      className="w-full input-field"
                       required={!isLogin}
                     />
                   </div>
                 )}
 
                 <div>
-                  <label className="block text-white font-medium mb-2">
+                  <label className="block mb-2 font-medium text-white">
                     Email
                   </label>
                   <input
@@ -240,13 +240,13 @@ export default function HomePage() {
                     value={formData.email}
                     onChange={handleInputChange}
                     placeholder="seu@email.com"
-                    className="input-field w-full"
+                    className="w-full input-field"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-white font-medium mb-2">
+                  <label className="block mb-2 font-medium text-white">
                     Senha
                   </label>
                   <div className="relative">
@@ -256,14 +256,14 @@ export default function HomePage() {
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Sua senha"
-                      className="input-field w-full pr-10"
+                      className="pr-10 w-full input-field"
                       required
                       minLength={6}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
+                      className="absolute right-3 top-1/2 text-gray-400 transform -translate-y-1/2 hover:text-white"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -273,11 +273,11 @@ export default function HomePage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full btn-primary py-3 font-semibold flex items-center justify-center gap-2"
+                  className="flex gap-2 justify-center items-center py-3 w-full font-semibold btn-primary"
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <div className="w-4 h-4 rounded-full border-b-2 border-white animate-spin"></div>
                       {isLogin ? 'Entrando...' : 'Criando conta...'}
                     </>
                   ) : (
@@ -289,17 +289,7 @@ export default function HomePage() {
                 </button>
               </form>
 
-              <div className="mt-6 text-center">
-                <button
-                  onClick={() => {
-                    setShowLogin(false);
-                    setFormData({ email: '', password: '', name: '' });
-                  }}
-                  className="text-gray-400 hover:text-white text-sm"
-                >
-                  ← Voltar
-                </button>
-              </div>
+              
             </div>
           )}
         </main>
