@@ -36,24 +36,25 @@ export default function EnvioPage() {
     try {
       // Processar inline sem página de processamento
       let finalEssayText: string = ''
+      let useImageForCorrection = false;
       if (submissionType === 'image' && selectedImage) {
-        const ocrFormData = new FormData();
-        ocrFormData.append('image', selectedImage);
-        // Usando o novo endpoint de extração de texto com n8n
-        const ocrResponse = await fetch('/api/extract-text-n8n', { method: 'POST', body: ocrFormData });
-        if (!ocrResponse.ok) {
-          const errorData = await ocrResponse.json().catch(() => ({ error: 'Erro no OCR' }));
-          throw new Error(errorData.error || 'Falha ao extrair texto da imagem');
-        }
-        const ocrResult = await ocrResponse.json();
-        finalEssayText = ocrResult.extractedText as string;
+        // Não usaremos mais OCR — enviaremos a imagem diretamente para correção
+        useImageForCorrection = true;
+        finalEssayText = '';
       } else {
         finalEssayText = essayText;
       }
 
       const correctionFormData = new FormData();
       correctionFormData.append('topic', topic || '');
-      correctionFormData.append('essayText', finalEssayText || '');
+      // Se for para usar a imagem para correção, anexe o arquivo; caso contrário, anexe o texto
+      if (useImageForCorrection && selectedImage) {
+        correctionFormData.append('image', selectedImage);
+        // ainda passamos essayText vazio para manter consistência
+        correctionFormData.append('essayText', '');
+      } else {
+        correctionFormData.append('essayText', finalEssayText || '');
+      }
       // Usando o novo endpoint de integração com n8n
       const response = await fetch('/api/n8n-correction', { method: 'POST', body: correctionFormData });
       if (!response.ok) {

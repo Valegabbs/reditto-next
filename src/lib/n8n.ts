@@ -59,6 +59,12 @@ export async function callN8nWebhook(payload: N8nRequest): Promise<N8nResponse> 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
+    // Garantir compatibilidade com workflows que esperam a chave capitalizada 'Topic'
+    const requestBody: any = { ...payload };
+    if (!Object.prototype.hasOwnProperty.call(requestBody, 'Topic') && requestBody.topic) {
+      requestBody.Topic = requestBody.topic;
+    }
+
     const response = await fetch(N8N_WEBHOOK_URL, {
       method: 'POST',
       headers: {
@@ -67,7 +73,7 @@ export async function callN8nWebhook(payload: N8nRequest): Promise<N8nResponse> 
         'Accept': 'application/json',
         'User-Agent': 'Reditto-Next/1.0'
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(requestBody),
       signal: controller.signal
     });
 
