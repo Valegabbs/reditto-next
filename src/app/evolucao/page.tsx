@@ -19,8 +19,10 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const [lockedIndex, setLockedIndex] = useState<number | null>(null);
   const [tooltipPos, setTooltipPos] = useState<{ left: number; top: number } | null>(null);
-  const width = 760;
-  const height = 300;
+  // Responsividade: ajusta largura e altura do gráfico conforme tamanho da tela
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const width = isMobile ? 340 : 760;
+  const height = isMobile ? 180 : 300;
   const padding = 48;
 
   const values = data.map(d => (d.value ?? 0));

@@ -170,7 +170,7 @@ export default function HistoricoPage() {
                       };
 
                       return (
-                        <article key={e.id} onClick={handleOpen} className="group cursor-pointer p-6 rounded-2xl panel-base border border-gray-700/40 hover:scale-105 transform transition-all duration-200">
+                        <article key={e.id} onClick={handleOpen} className="group cursor-pointer p-6 rounded-2xl panel-base border border-gray-700/40 hover:scale-105 transform transition-all duration-200 relative">
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
                               <div className="status-circle p-2 rounded-full" aria-hidden="true">
@@ -179,14 +179,14 @@ export default function HistoricoPage() {
                                 </svg>
                               </div>
                               <div>
-                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-200/60 to-gray-200/40 px-4 py-1 rounded-full">
+                                {/* Campo cinza e tema ocultos em telas pequenas */}
+                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-200/60 to-gray-200/40 px-4 py-1 rounded-full hidden md:flex">
                                   <div className="text-xs font-semibold tracking-wide text-yellow-400">&nbsp;</div>
                                   <div className="text-sm font-semibold text-black">{title}</div>
                                 </div>
                                 <div className="text-sm hist-date mt-2">Enviada em: {new Date(e.created_at).toLocaleString()}</div>
                               </div>
                             </div>
-
                             <div className="text-center">
                               <div className="text-5xl font-extrabold hist-score">{e.final_score ?? '—'}</div>
                               <div className="text-sm hist-score-desc">pontos de 1000</div>
@@ -215,6 +215,21 @@ export default function HistoricoPage() {
                               <div className="text-lg font-bold" style={{color: '#7734e7'}}>{c5}</div>
                               <div className="text-xs text-gray-400">C5</div>
                             </div>
+                          </div>
+                          {/* Ícone de lixeira centralizado abaixo das competências, com fundo e borda circular, ícone mais escuro que o bg do card */}
+                          <div className="flex justify-center mt-4">
+                            <button
+                              type="button"
+                              onClick={ev => { ev.stopPropagation(); handleDelete(e.id); }}
+                              className="p-0 bg-transparent hover:scale-110 transition-transform"
+                              aria-label="Excluir redação"
+                            >
+                              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 border-2 border-gray-600">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
+                                  <path fill="#fff" d="M9 3v1H4v2h16V4h-5V3a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2zm-4 6v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9H5zm2 2h10v9H7v-9z"/>
+                                </svg>
+                              </span>
+                            </button>
                           </div>
                         </article>
                       );
