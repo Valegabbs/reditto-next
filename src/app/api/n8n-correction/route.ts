@@ -41,6 +41,13 @@ export async function POST(request: NextRequest) {
     });
 
     // Validações básicas
+    if (!topic || !topic.trim()) {
+      console.error('❌ Tema não fornecido');
+      return NextResponse.json(
+        { error: 'O tema da redação é obrigatório' },
+        { status: 400, headers: responseHeaders }
+      );
+    }
     if (!essayText && !imageFile) {
       console.error('❌ Nenhum texto ou imagem fornecido');
       return NextResponse.json(
