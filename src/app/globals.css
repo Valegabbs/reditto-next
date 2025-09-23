@@ -408,6 +408,14 @@ body {
 }
 [data-theme="light"] .sidebar-button-inactive:hover { background: #94a3b8; }
 
+/* Chart tooltip: ensure visible text on light mode */
+[data-theme="light"] .chart-tooltip {
+  background: #0b1220; /* near-black */
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.25);
+}
+[data-theme="light"] .chart-tooltip .text-gray-200 { color: #e5e7eb; }
+
 /* Welcome message: increase contrast only on light mode */
 [data-theme="light"] .welcome-message {
   color: #7328e2; /* much darker purple for high contrast */
