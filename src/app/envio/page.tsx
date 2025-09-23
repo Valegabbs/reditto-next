@@ -20,6 +20,7 @@ export default function EnvioPage() {
   const [essayText, setEssayText] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [triedSubmitWithoutTopic, setTriedSubmitWithoutTopic] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +34,7 @@ export default function EnvioPage() {
     e.preventDefault();
 
     if (!topic.trim()) {
-      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
+      setTriedSubmitWithoutTopic(true);
       try { document.getElementById('topic-input')?.focus(); } catch {}
       return;
     }
@@ -97,11 +98,11 @@ export default function EnvioPage() {
           {/* Header */}
           <div className="flex items-center p-6">
             {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
-              <div className="hidden md:flex gap-3 items-center ml-4 header-item">
+              <div className="hidden gap-3 items-center ml-4 md:flex header-item">
               <Image src="/assets/logo.PNG" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
               <span className="text-base font-medium header-text text-white/90">Correção de Redação para Todos!</span>
             </div>
-            <div className="ml-auto flex gap-3 items-center">
+            <div className="flex gap-3 items-center ml-auto">
               <button 
                 onClick={() => {
                   const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -109,7 +110,7 @@ export default function EnvioPage() {
                   document.documentElement.setAttribute('data-theme', next);
                   try { localStorage.setItem('reditto-theme', next); } catch {}
                 }} 
-                className="p-2 text-white rounded-full transition-colors hover:text-yellow-400 border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
+                className="p-2 text-white rounded-full border transition-colors hover:text-yellow-400 border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
                 aria-label="Alternar tema"
               >
                 <Sun size={20} />
@@ -307,15 +308,14 @@ export default function EnvioPage() {
           </main>
           <Disclaimer />
           {/* Botão de aviso flutuante quando o tema não está preenchido */}
-          {!topic.trim() && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+          {triedSubmitWithoutTopic && !topic.trim() && (
+            <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
               <button
                 type="button"
                 onClick={() => {
                   try { document.getElementById('topic-input')?.focus(); } catch {}
-                  window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
                 }}
-                className="flex items-center gap-2 px-5 py-3 rounded-full shadow-lg border backdrop-blur-sm bg-yellow-900/30 border-yellow-500/40 text-yellow-200 hover:bg-yellow-900/40 transition-colors"
+                className="flex gap-2 items-center px-5 py-3 text-yellow-200 rounded-full border shadow-lg backdrop-blur-sm transition-colors bg-yellow-900/30 border-yellow-500/40 hover:bg-yellow-900/40"
                 aria-label="Aviso: tema da redação não preenchido"
               
               >
