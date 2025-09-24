@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
@@ -9,11 +9,13 @@ import Disclaimer from '../components/Disclaimer';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import TermsConsentModal from '../components/TermsConsentModal';
+import { supabase } from '@/lib/supabase';
 
 type SubmissionType = 'text' | 'image';
 
 export default function EnvioPage() {
-  const { user, signOut, isConfigured } = useAuth();
+  const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
   const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
   const [topic, setTopic] = useState('');
@@ -21,6 +23,8 @@ export default function EnvioPage() {
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [triedSubmitWithoutTopic, setTriedSubmitWithoutTopic] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,6 +36,11 @@ export default function EnvioPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Bloquear envio se consentimento ainda não aceito
+    if (!await ensureConsent()) {
+      return;
+    }
 
     if (!topic.trim()) {
       setTriedSubmitWithoutTopic(true);
@@ -82,8 +91,72 @@ export default function EnvioPage() {
   };
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
+    setShowConsent(false);
     await signOut();
     window.location.href = '/';
+  };
+
+  // Carregar/checar consentimento
+  useEffect(() => {
+    const check = async () => {
+      if (isSigningOut) { setShowConsent(false); return; }
+      // Aguarda carregar estado de auth para evitar abrir modal indevidamente
+      if (loading) return;
+
+      // Visitante: sempre exige consentimento
+      if (!isConfigured || !user) {
+        setShowConsent(true);
+        return;
+      }
+
+      // Usuário logado: verificar no metadata
+      const acceptedTerms = Boolean(user.user_metadata?.accepted_terms);
+      const acceptedPrivacy = Boolean(user.user_metadata?.accepted_privacy);
+      setShowConsent(!(acceptedTerms && acceptedPrivacy));
+    };
+    check();
+  }, [isConfigured, user, loading, isSigningOut]);
+
+  const ensureConsent = async (): Promise<boolean> => {
+    // Visitante
+    if (!isConfigured || !user) {
+      setShowConsent(true);
+      return false;
+    }
+
+    // Logado
+    const acceptedTerms = Boolean(user.user_metadata?.accepted_terms);
+    const acceptedPrivacy = Boolean(user.user_metadata?.accepted_privacy);
+    if (!(acceptedTerms && acceptedPrivacy)) {
+      setShowConsent(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handleConsentProceed = async () => {
+    // Visitante: salvar somente na sessão/localStorage
+    if (!isConfigured || !user) {
+      setShowConsent(false);
+      return;
+    }
+
+    // Logado: persistir no user_metadata
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          accepted_terms: true,
+          accepted_privacy: true,
+          accepted_at: new Date().toISOString()
+        }
+      });
+      if (error) throw error;
+      setShowConsent(false);
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Consentimento registrado com sucesso.', type: 'success' } }));
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: `Erro ao registrar consentimento. Tente novamente.`, type: 'error' } }));
+    }
   };
 
   return (
@@ -307,6 +380,10 @@ export default function EnvioPage() {
             </div>
           </main>
           <Disclaimer />
+          <TermsConsentModal
+            isOpen={showConsent && !isSigningOut}
+            onProceed={handleConsentProceed}
+          />
           {/* Botão de aviso flutuante quando o tema não está preenchido */}
           {triedSubmitWithoutTopic && !topic.trim() && (
             <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
