@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { callN8nWebhook, validateN8nCredentials } from '@/lib/n8n';
+import { callN8nWebhook, validateN8nCredentials, N8N_GENERIC_ERROR } from '@/lib/n8n';
 
 // Configurações de segurança
 const MAX_TEXT_LENGTH = 5000;
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
     if (!credentialsCheck.valid) {
       console.error('❌ Credenciais do n8n inválidas:', credentialsCheck.error);
       return NextResponse.json(
-        { error: `Configuração inválida: ${credentialsCheck.error}. Configure as variáveis N8N_* no arquivo .env.local` },
+        { error: N8N_GENERIC_ERROR },
         { status: 500 }
       );
     }
@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
     if (!n8nResponse.success) {
       console.error('❌ Erro na resposta do n8n:', n8nResponse.error);
       return NextResponse.json(
-        { error: n8nResponse.error || 'Erro ao processar a redação' },
+        { error: N8N_GENERIC_ERROR },
         { status: 500, headers: responseHeaders }
       );
     }
@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('❌ Erro no processamento:', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro desconhecido no processamento' },
+      { error: N8N_GENERIC_ERROR },
       { status: 500 }
     );
   }

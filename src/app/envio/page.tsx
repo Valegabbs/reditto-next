@@ -76,8 +76,8 @@ export default function EnvioPage() {
       // Usando o novo endpoint de integração com n8n
       const response = await fetch('/api/n8n-correction', { method: 'POST', body: correctionFormData });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-        throw new Error(errorData.error || 'Falha ao processar a redação');
+        const errorData = await response.json().catch(() => ({ error: 'Estamos tendo problemas no servidor, tente mais tarde.' }));
+        throw new Error(errorData.error || 'Estamos tendo problemas no servidor, tente mais tarde.');
       }
       const result = await response.json();
       // Encerrar animação antes de redirecionar
