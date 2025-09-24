@@ -25,6 +25,7 @@ export default function EnvioPage() {
   const [triedSubmitWithoutTopic, setTriedSubmitWithoutTopic] = useState(false);
   const [showConsent, setShowConsent] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -106,14 +107,20 @@ export default function EnvioPage() {
 
       // Visitante: sempre exige consentimento
       if (!isConfigured || !user) {
-        setShowConsent(true);
+        setHasAcceptedConsent(false);
+        // Exigir na entrada da página, mas não repetir após aceite nesta sessão
+        let accepted = false;
+        try { accepted = sessionStorage.getItem('reditto-visitor-consent-accepted') === 'true'; } catch {}
+        setShowConsent(!accepted);
         return;
       }
 
       // Usuário logado: verificar no metadata
       const acceptedTerms = Boolean(user.user_metadata?.accepted_terms);
       const acceptedPrivacy = Boolean(user.user_metadata?.accepted_privacy);
-      setShowConsent(!(acceptedTerms && acceptedPrivacy));
+      const accepted = acceptedTerms && acceptedPrivacy;
+      setHasAcceptedConsent(accepted);
+      setShowConsent(!accepted);
     };
     check();
   }, [isConfigured, user, loading, isSigningOut]);
@@ -121,14 +128,17 @@ export default function EnvioPage() {
   const ensureConsent = async (): Promise<boolean> => {
     // Visitante
     if (!isConfigured || !user) {
-      setShowConsent(true);
-      return false;
+      let accepted = false;
+      try { accepted = sessionStorage.getItem('reditto-visitor-consent-accepted') === 'true'; } catch {}
+      if (!accepted) {
+        setShowConsent(true);
+        return false;
+      }
+      return true;
     }
 
     // Logado
-    const acceptedTerms = Boolean(user.user_metadata?.accepted_terms);
-    const acceptedPrivacy = Boolean(user.user_metadata?.accepted_privacy);
-    if (!(acceptedTerms && acceptedPrivacy)) {
+    if (!hasAcceptedConsent) {
       setShowConsent(true);
       return false;
     }
@@ -138,6 +148,7 @@ export default function EnvioPage() {
   const handleConsentProceed = async () => {
     // Visitante: salvar somente na sessão/localStorage
     if (!isConfigured || !user) {
+      try { sessionStorage.setItem('reditto-visitor-consent-accepted', 'true'); } catch {}
       setShowConsent(false);
       return;
     }
@@ -152,6 +163,7 @@ export default function EnvioPage() {
         }
       });
       if (error) throw error;
+      setHasAcceptedConsent(true);
       setShowConsent(false);
       window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Consentimento registrado com sucesso.', type: 'success' } }));
     } catch (error) {
