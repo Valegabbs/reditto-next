@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
@@ -9,17 +9,23 @@ import Disclaimer from '../components/Disclaimer';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import TermsConsentModal from '../components/TermsConsentModal';
+import { supabase } from '@/lib/supabase';
 
 type SubmissionType = 'text' | 'image';
 
 export default function EnvioPage() {
-  const { user, signOut, isConfigured } = useAuth();
+  const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
   const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
   const [topic, setTopic] = useState('');
   const [essayText, setEssayText] = useState('');
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [triedSubmitWithoutTopic, setTriedSubmitWithoutTopic] = useState(false);
+  const [showConsent, setShowConsent] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,8 +38,13 @@ export default function EnvioPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Bloquear envio se consentimento ainda não aceito
+    if (!await ensureConsent()) {
+      return;
+    }
+
     if (!topic.trim()) {
-      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
+      setTriedSubmitWithoutTopic(true);
       try { document.getElementById('topic-input')?.focus(); } catch {}
       return;
     }
@@ -65,8 +76,8 @@ export default function EnvioPage() {
       // Usando o novo endpoint de integração com n8n
       const response = await fetch('/api/n8n-correction', { method: 'POST', body: correctionFormData });
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Erro desconhecido' }));
-        throw new Error(errorData.error || 'Falha ao processar a redação');
+        const errorData = await response.json().catch(() => ({ error: 'Estamos tendo problemas no servidor, tente mais tarde.' }));
+        throw new Error(errorData.error || 'Estamos tendo problemas no servidor, tente mais tarde.');
       }
       const result = await response.json();
       // Encerrar animação antes de redirecionar
@@ -81,8 +92,83 @@ export default function EnvioPage() {
   };
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
+    setShowConsent(false);
     await signOut();
     window.location.href = '/';
+  };
+
+  // Carregar/checar consentimento
+  useEffect(() => {
+    const check = async () => {
+      if (isSigningOut) { setShowConsent(false); return; }
+      // Aguarda carregar estado de auth para evitar abrir modal indevidamente
+      if (loading) return;
+
+      // Visitante: sempre exige consentimento
+      if (!isConfigured || !user) {
+        setHasAcceptedConsent(false);
+        // Exigir na entrada da página, mas não repetir após aceite nesta sessão
+        let accepted = false;
+        try { accepted = sessionStorage.getItem('reditto-visitor-consent-accepted') === 'true'; } catch {}
+        setShowConsent(!accepted);
+        return;
+      }
+
+      // Usuário logado: verificar no metadata
+      const acceptedTerms = Boolean(user.user_metadata?.accepted_terms);
+      const acceptedPrivacy = Boolean(user.user_metadata?.accepted_privacy);
+      const accepted = acceptedTerms && acceptedPrivacy;
+      setHasAcceptedConsent(accepted);
+      setShowConsent(!accepted);
+    };
+    check();
+  }, [isConfigured, user, loading, isSigningOut]);
+
+  const ensureConsent = async (): Promise<boolean> => {
+    // Visitante
+    if (!isConfigured || !user) {
+      let accepted = false;
+      try { accepted = sessionStorage.getItem('reditto-visitor-consent-accepted') === 'true'; } catch {}
+      if (!accepted) {
+        setShowConsent(true);
+        return false;
+      }
+      return true;
+    }
+
+    // Logado
+    if (!hasAcceptedConsent) {
+      setShowConsent(true);
+      return false;
+    }
+    return true;
+  };
+
+  const handleConsentProceed = async () => {
+    // Visitante: salvar somente na sessão/localStorage
+    if (!isConfigured || !user) {
+      try { sessionStorage.setItem('reditto-visitor-consent-accepted', 'true'); } catch {}
+      setShowConsent(false);
+      return;
+    }
+
+    // Logado: persistir no user_metadata
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          accepted_terms: true,
+          accepted_privacy: true,
+          accepted_at: new Date().toISOString()
+        }
+      });
+      if (error) throw error;
+      setHasAcceptedConsent(true);
+      setShowConsent(false);
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Consentimento registrado com sucesso.', type: 'success' } }));
+    } catch (error) {
+      window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: `Erro ao registrar consentimento. Tente novamente.`, type: 'error' } }));
+    }
   };
 
   return (
@@ -97,11 +183,11 @@ export default function EnvioPage() {
           {/* Header */}
           <div className="flex items-center p-6">
             {/* Esconde logo e slogan no mobile (onde existe o menu hambúrguer) */}
-              <div className="hidden md:flex gap-3 items-center ml-4 header-item">
+              <div className="hidden gap-3 items-center ml-4 md:flex header-item">
               <Image src="/assets/logo.PNG" alt="Reditto Logo" width={36} height={36} className="w-9 h-9" />
               <span className="text-base font-medium header-text text-white/90">Correção de Redação para Todos!</span>
             </div>
-            <div className="ml-auto flex gap-3 items-center">
+            <div className="flex gap-3 items-center ml-auto">
               <button 
                 onClick={() => {
                   const current = document.documentElement.getAttribute('data-theme') || 'dark';
@@ -109,7 +195,7 @@ export default function EnvioPage() {
                   document.documentElement.setAttribute('data-theme', next);
                   try { localStorage.setItem('reditto-theme', next); } catch {}
                 }} 
-                className="p-2 text-white rounded-full transition-colors hover:text-yellow-400 border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
+                className="p-2 text-white rounded-full border transition-colors hover:text-yellow-400 border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text" 
                 aria-label="Alternar tema"
               >
                 <Sun size={20} />
@@ -306,16 +392,19 @@ export default function EnvioPage() {
             </div>
           </main>
           <Disclaimer />
+          <TermsConsentModal
+            isOpen={showConsent && !isSigningOut}
+            onProceed={handleConsentProceed}
+          />
           {/* Botão de aviso flutuante quando o tema não está preenchido */}
-          {!topic.trim() && (
-            <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+          {triedSubmitWithoutTopic && !topic.trim() && (
+            <div className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2">
               <button
                 type="button"
                 onClick={() => {
                   try { document.getElementById('topic-input')?.focus(); } catch {}
-                  window.dispatchEvent(new CustomEvent('reditto:toast', { detail: { message: 'Adicione um tema para enviar a redação.', type: 'info' } }));
                 }}
-                className="flex items-center gap-2 px-5 py-3 rounded-full shadow-lg border backdrop-blur-sm bg-yellow-900/30 border-yellow-500/40 text-yellow-200 hover:bg-yellow-900/40 transition-colors"
+                className="flex gap-2 items-center px-5 py-3 text-yellow-200 rounded-full border shadow-lg backdrop-blur-sm transition-colors bg-yellow-900/30 border-yellow-500/40 hover:bg-yellow-900/40"
                 aria-label="Aviso: tema da redação não preenchido"
               
               >

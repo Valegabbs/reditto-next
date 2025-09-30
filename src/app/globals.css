@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 [data-theme="light"] .hist-date { color: #000; }
 [data-theme="light"] .hist-score { color: #7734e7; }
 [data-theme="light"] .hist-score-desc { color: #7734e7; }
@@ -50,11 +54,6 @@
 [data-theme="dark"] .evolution-chart .fill-area { fill: rgba(11,12,20,0.6); }
 [data-theme="dark"] .x-label { fill: rgba(255,255,255,0.7); }
 [data-theme="dark"] .y-label { fill: rgba(255,255,255,0.35); }
-
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   --background: #0f131c;
@@ -407,6 +406,14 @@ body {
   border-color: #94a3b8; /* slate-400 */
 }
 [data-theme="light"] .sidebar-button-inactive:hover { background: #94a3b8; }
+
+/* Chart tooltip: ensure visible text on light mode */
+[data-theme="light"] .chart-tooltip {
+  background: #0b1220; /* near-black */
+  color: #ffffff;
+  border-color: rgba(0,0,0,0.25);
+}
+[data-theme="light"] .chart-tooltip .text-gray-200 { color: #e5e7eb; }
 
 /* Welcome message: increase contrast only on light mode */
 [data-theme="light"] .welcome-message {

@@ -5,6 +5,8 @@ const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || '';
 const N8N_API_KEY = process.env.NEXT_PUBLIC_N8N_API_KEY || '';
 const TIMEOUT_MS = 60000; // 60 segundos
 
+export const N8N_GENERIC_ERROR = 'Estamos tendo problemas no servidor, tente mais tarde.';
+
 // Validar se as credenciais do n8n estão configuradas
 export function validateN8nCredentials() {
   const issues = [];
@@ -86,21 +88,9 @@ export async function callN8nWebhook(payload: N8nRequest): Promise<N8nResponse> 
         statusText: response.statusText,
         body: errorText
       });
-      
-      let errorMessage = 'Erro na comunicação com o n8n';
-      if (response.status === 401 || response.status === 403) {
-        errorMessage = 'Credenciais inválidas para o n8n';
-      } else if (response.status === 404 || response.status === 405) {
-        errorMessage = 'Webhook não encontrado no n8n';
-      } else if (response.status === 429) {
-        errorMessage = 'Muitas requisições. Tente novamente em alguns minutos';
-      } else if (response.status >= 500) {
-        errorMessage = 'Servidor do n8n temporariamente indisponível';
-      }
-      
       return {
         success: false,
-        error: `${errorMessage} (${response.status})`
+        error: N8N_GENERIC_ERROR
       };
     }
 
@@ -191,14 +181,14 @@ export async function callN8nWebhook(payload: N8nRequest): Promise<N8nResponse> 
       console.error('❌ Timeout na requisição para n8n');
       return {
         success: false,
-        error: 'Timeout na comunicação com o n8n. Tente novamente.'
+        error: N8N_GENERIC_ERROR
       };
     }
     
     console.error('❌ Erro na comunicação com n8n:', error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : 'Erro desconhecido'
+      error: N8N_GENERIC_ERROR
     };
   }
 }

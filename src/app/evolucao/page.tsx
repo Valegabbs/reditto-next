@@ -73,7 +73,7 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
   };
 
   return (
-    <div ref={containerRef} className="relative w-full overflow-x-auto">
+    <div ref={containerRef} className="overflow-x-auto relative w-full">
       <svg ref={svgRef} viewBox={`0 0 ${width} ${height}`} className="w-full h-auto" onMouseMove={handleMove} onMouseLeave={handleLeave}>
         {/* grid lines and y axis labels */}
         {yTicks.map((t, idx) => {
@@ -143,8 +143,8 @@ function InteractiveLineChart({ data }: { data: DataPoint[] }) {
           const left = p.x * scaleX;
           const top = p.y * scaleY;
           return (
-            <div className="absolute pointer-events-none z-50" style={{ left, top, transform: 'translate(-50%, calc(-100% - 16px))' }}>
-              <div className="bg-gray-900 text-white text-sm px-3 py-2 rounded-lg shadow-lg border border-black/20 whitespace-nowrap">
+            <div className="absolute z-50 pointer-events-none" style={{ left, top, transform: 'translate(-50%, calc(-100% - 16px))' }}>
+              <div className="px-3 py-2 text-sm text-white whitespace-nowrap bg-gray-900 rounded-lg border shadow-lg chart-tooltip border-black/20">
                 <div className="font-semibold">{formatXLabel(hoverIndex)}</div>
                 <div className="text-xs text-gray-200">{data[hoverIndex].value ?? '—'}</div>
               </div>
@@ -199,17 +199,17 @@ export default function EvolucaoPage() {
         <div className="flex">
           <Sidebar />
           <div className="w-full">
-            <div className="max-w-6xl px-6 py-8 mx-auto">
+            <div className="px-6 py-8 mx-auto max-w-6xl">
               {/* Header (same as Envio) */}
               <div className="flex items-center p-6 mb-4">
-                <div className="hidden md:flex items-center gap-2 header-item bg-gray-800/20 border border-gray-700/50 rounded-full px-4 py-2 backdrop-blur-sm">
+                <div className="hidden gap-2 items-center px-4 py-2 rounded-full border backdrop-blur-sm md:flex header-item bg-gray-800/20 border-gray-700/50">
                   <Image src="/assets/logo.PNG" alt="Reditto Logo" width={20} height={20} className="w-5 h-5" />
-                  <span className="header-text text-white/90 text-sm font-medium">Correção de Redação para Todos!</span>
+                  <span className="text-sm font-medium header-text text-white/90">Correção de Redação para Todos!</span>
                 </div>
-                <div className="ml-auto flex items-center gap-3">
+                <div className="flex gap-3 items-center ml-auto">
                   <button 
                     onClick={() => { window.location.href = '/envio'; }}
-                    className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+                    className="flex justify-center items-center p-2 text-white rounded-full border transition-colors hover:text-purple-300 border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60"
                     aria-label="Ir para envio"
                   >
                     <ArrowLeft size={18} />
@@ -221,7 +221,7 @@ export default function EvolucaoPage() {
                       document.documentElement.setAttribute('data-theme', next);
                       try { localStorage.setItem('reditto-theme', next); } catch {}
                     }}
-                    className="text-white hover:text-yellow-400 transition-colors p-2 rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text"
+                    className="p-2 text-white rounded-full border transition-colors hover:text-yellow-400 border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 header-text"
                     aria-label="Alternar tema"
                   >
                     <Sun size={20} />
@@ -234,29 +234,29 @@ export default function EvolucaoPage() {
 
               <div className="mb-6">
                 <h1 className="text-3xl font-bold text-white">Evolução</h1>
-                <p className="text-gray-300 mt-2">Acompanhe a sua evolução de notas ao longo das redações. Passe o mouse sobre os pontos para ver a redação e clique para abrir o histórico.</p>
+                <p className="mt-2 text-gray-300">Acompanhe a sua evolução de notas ao longo das redações. Passe o mouse sobre os pontos para ver a redação e clique para abrir o histórico.</p>
               </div>
 
-              <div className="p-6 rounded-2xl border border-gray-700/50 bg-gray-800/20 backdrop-blur-sm">
+              <div className="p-6 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
                 {loading ? (
                   <div className="text-gray-300">Carregando evolução...</div>
                 ) : scores.length === 0 ? (
                   <div className="text-gray-300">Sem dados para exibir. Envie sua primeira redação!</div>
                 ) : (
                   <div className="space-y-6">
-                    <div className="w-full overflow-hidden rounded-xl p-4 relative evolution-chart">
+                    <div className="overflow-hidden relative p-4 w-full rounded-xl evolution-chart">
                       <InteractiveLineChart data={dataPoints} />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-purple-700/10 to-purple-700/5">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                      <div className="p-4 bg-gradient-to-br rounded-lg panel-base from-purple-700/10 to-purple-700/5">
                         <div className="text-sm text-gray-400">Média</div>
                         <div className="text-2xl font-semibold text-white">{stats.avg ?? '—'}</div>
                       </div>
-                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-red-600/8 to-red-600/4">
+                      <div className="p-4 bg-gradient-to-br rounded-lg panel-base from-red-600/8 to-red-600/4">
                         <div className="text-sm text-gray-400">Pior Nota</div>
                         <div className="text-2xl font-semibold text-white">{stats.min ?? '—'}</div>
                       </div>
-                      <div className="p-4 rounded-lg panel-base bg-gradient-to-br from-green-600/8 to-green-600/4">
+                      <div className="p-4 bg-gradient-to-br rounded-lg panel-base from-green-600/8 to-green-600/4">
                         <div className="text-sm text-gray-400">Melhor Nota</div>
                         <div className="text-2xl font-semibold text-white">{stats.max ?? '—'}</div>
                       </div>
