@@ -15,7 +15,7 @@ Crie um arquivo `.env.local` na raiz do projeto:
 # Open WebUI Configuration (EasyPanel)
 # IMPORTANTE: Configure essas variáveis conforme o EasyPanel
 OPEN_WEBUI_BASE_URL=https://reditto-ollama-web.afeavy.easypanel.host
-OPEN_WEBUI_API_KEY=ssk-b6c1fa859b574220a03342ac5d854d5f
+OPEN_WEBUI_API_KEY=sua_api_key_aqui
 OPEN_WEBUI_MODEL=gemma3:4b
 OPEN_WEBUI_JWT_TOKEN=
 

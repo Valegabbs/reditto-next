@@ -2,9 +2,9 @@
 require('dotenv').config({ path: '.env.local' });
 const fetch = require('node-fetch');
 
-// Usar valores diretos para teste
-const N8N_WEBHOOK_URL = "https://reditto-n8n.004ose.easypanel.host/webhook/reditto";
-const N8N_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5NDJjNjNmZi1mYWU0LTRmYmYtOTEwMy02OTRlZDc5OGY3YjkiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzU4NDY4NzI3LCJleHAiOjE3NjEwMTkyMDB9.FGXbPSa1Z5JN48dOrjf8Pmvmi4ClGsudOlyWGjeABLA";
+// Usar variáveis de ambiente para segurança
+const N8N_WEBHOOK_URL = process.env.NEXT_PUBLIC_N8N_WEBHOOK_URL || '';
+const N8N_API_KEY = process.env.NEXT_PUBLIC_N8N_API_KEY || '';
 
 console.log('=== CONFIGURAÇÃO DE TESTE ===');
 console.log('N8N_WEBHOOK_URL:', N8N_WEBHOOK_URL ? 'Configurada' : 'Não configurada');

@@ -85,13 +85,17 @@ export function middleware(request: NextRequest) {
   response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
   
   // CSP (Content Security Policy) básico
-  const DEFAULT_SUPABASE_URL = 'https://imrqgircligznruvudpf.supabase.co'
   let resolvedSupabaseUrl: URL
   try {
-    resolvedSupabaseUrl = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL)
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    if (!supabaseUrl) {
+      console.warn('⚠️ NEXT_PUBLIC_SUPABASE_URL não configurada')
+      return NextResponse.next()
+    }
+    resolvedSupabaseUrl = new URL(supabaseUrl)
   } catch {
-    // Fallback seguro caso a env esteja vazia ou inválida
-    resolvedSupabaseUrl = new URL(DEFAULT_SUPABASE_URL)
+    console.warn('⚠️ URL do Supabase inválida')
+    return NextResponse.next()
   }
   const supabaseDomain = resolvedSupabaseUrl.origin
   const supabaseHost = resolvedSupabaseUrl.host
