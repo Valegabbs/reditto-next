@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, History, TrendingUp, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
+import { Home, History, TrendingUp, ChevronLeft, ChevronRight, MessageCircle, BookOpen } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar() {
@@ -45,7 +45,7 @@ export default function Sidebar() {
   const [showVisitorNotice, setShowVisitorNotice] = React.useState(false)
   const [requestedHref, setRequestedHref] = React.useState<string | null>(null)
 
-  const restricted = (href: string) => ['/historico', '/evolucao', '/whatsapp'].includes(href)
+  const restricted = (href: string) => ['/historico', '/evolucao', '/whatsapp', '/temas'].includes(href)
 
   function handleNavigate(href: string) {
     if (!user && restricted(href)) {
@@ -123,6 +123,12 @@ export default function Sidebar() {
               title="Evolução"
             />
             <Button
+              href="/temas"
+              icon={<BookOpen size={18} />}
+              label="Temas"
+              title="Temas"
+            />
+            <Button
               href="/whatsapp"
               icon={<MessageCircle size={18} />}
               label="Whatsapp"
@@ -142,6 +148,7 @@ export default function Sidebar() {
               <Button href="/envio" icon={<Home size={18} />} label="Início" title="Início" />
               <Button href="/historico" icon={<History size={18} />} label="Histórico" title="Histórico" />
               <Button href="/evolucao" icon={<TrendingUp size={18} />} label="Evolução" title="Evolução" />
+              <Button href="/temas" icon={<BookOpen size={18} />} label="Temas" title="Temas" />
               <Button href="/whatsapp" icon={<MessageCircle size={18} />} label="Whatsapp" title="Whatsapp" />
             </div>
           </div>
@@ -153,7 +160,7 @@ export default function Sidebar() {
           <div className="max-w-md w-full mx-4 p-6 rounded-2xl border border-purple-400/50 bg-gradient-to-br from-purple-800/95 via-purple-900/95 to-black/80 text-white shadow-[0_10px_40px_rgba(168,85,247,0.3)] backdrop-blur-md">
             <h2 className="text-xl font-semibold text-purple-200 mb-2">Recurso exclusivo para usuários logados</h2>
             <p className="text-purple-100/90 mb-4">
-              As seções Histórico, Evolução e Favoritas ficam disponíveis após login. Crie uma conta ou faça login para acessar.
+              As seções Histórico, Evolução, Temas e Favoritas ficam disponíveis após login. Crie uma conta ou faça login para acessar.
             </p>
             <div className="flex gap-2 justify-end">
               <button

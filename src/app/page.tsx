@@ -1,7 +1,7 @@
 	'use client';
 
 import { useState, useEffect } from 'react';
-import { Sun, Users, Mail, Eye, EyeOff, User } from 'lucide-react';
+import { Sun, Users, Mail, Eye, EyeOff, User, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
 import ClientWrapper from './components/ClientWrapper';
 import Disclaimer from './components/Disclaimer';
@@ -92,6 +92,12 @@ export default function HomePage() {
       ...formData,
       [e.target.name]: e.target.value
     });
+  };
+
+  const handleBackToHome = () => {
+    setShowLogin(false);
+    setIsLogin(false);
+    setFormData({ email: '', password: '', name: '' });
   };
 
   if (loading) {
@@ -203,13 +209,23 @@ export default function HomePage() {
           ) : (
             /* Formulário de Login/Registro */
             <div className="p-6 rounded-2xl main-form">
-              <div className="mb-6 text-center">
-                <h2 className="mb-2 text-2xl font-bold text-white">
-                  {isLogin ? 'Entrar' : 'Criar Conta'}
-                </h2>
-                <p className="text-sm text-gray-300">
-                  {isLogin ? 'Acesse sua conta' : 'Crie sua conta gratuita'}
-                </p>
+              <div className="flex items-center justify-between mb-6">
+                <button 
+                  onClick={handleBackToHome}
+                  className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2"
+                  aria-label="Voltar"
+                >
+                  <ArrowLeft size={18} />
+                </button>
+                <div className="text-center flex-1">
+                  <h2 className="mb-2 text-2xl font-bold text-white">
+                    {isLogin ? 'Entrar' : 'Criar Conta'}
+                  </h2>
+                  <p className="text-sm text-gray-300">
+                    {isLogin ? 'Acesse sua conta' : 'Crie sua conta gratuita'}
+                  </p>
+                </div>
+                <div className="w-10"></div> {/* Espaçador para centralizar o título */}
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">

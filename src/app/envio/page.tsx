@@ -8,7 +8,7 @@ import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TermsConsentModal from '../components/TermsConsentModal';
 import { supabase } from '@/lib/supabase';
 
@@ -17,6 +17,7 @@ type SubmissionType = 'text' | 'image';
 export default function EnvioPage() {
   const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
   const [topic, setTopic] = useState('');
   const [essayText, setEssayText] = useState('');
@@ -27,6 +28,14 @@ export default function EnvioPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
+
+  // Capturar tema da URL quando a página carrega
+  useEffect(() => {
+    const temaFromUrl = searchParams.get('tema');
+    if (temaFromUrl) {
+      setTopic(temaFromUrl);
+    }
+  }, [searchParams]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
