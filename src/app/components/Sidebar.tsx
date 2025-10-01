@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, History, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Home, History, TrendingUp, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar() {
@@ -45,12 +45,17 @@ export default function Sidebar() {
   const [showVisitorNotice, setShowVisitorNotice] = React.useState(false)
   const [requestedHref, setRequestedHref] = React.useState<string | null>(null)
 
-  const restricted = (href: string) => ['/historico', '/evolucao'].includes(href)
+  const restricted = (href: string) => ['/historico', '/evolucao', '/whatsapp'].includes(href)
 
   function handleNavigate(href: string) {
     if (!user && restricted(href)) {
       setRequestedHref(href)
       setShowVisitorNotice(true)
+      return
+    }
+    if (href === '/whatsapp') {
+      // abrir em nova aba sem fechar a atual
+      window.open('https://wa.link/pln20s', '_blank', 'noopener,noreferrer')
       return
     }
     router.push(href)
@@ -117,6 +122,12 @@ export default function Sidebar() {
               label="Evolução"
               title="Evolução"
             />
+            <Button
+              href="/whatsapp"
+              icon={<MessageCircle size={18} />}
+              label="Whatsapp"
+              title="Whatsapp"
+            />
             {/* Favoritas removida */}
           </div>
         </div>
@@ -131,6 +142,7 @@ export default function Sidebar() {
               <Button href="/envio" icon={<Home size={18} />} label="Início" title="Início" />
               <Button href="/historico" icon={<History size={18} />} label="Histórico" title="Histórico" />
               <Button href="/evolucao" icon={<TrendingUp size={18} />} label="Evolução" title="Evolução" />
+              <Button href="/whatsapp" icon={<MessageCircle size={18} />} label="Whatsapp" title="Whatsapp" />
             </div>
           </div>
         </div>

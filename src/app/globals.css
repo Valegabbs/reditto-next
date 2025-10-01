@@ -387,6 +387,10 @@ body {
   [data-theme="light"] .bg-dot-grid { --dot-color: rgba(3, 3, 3, 0.24); }
 }
 
+/* Forçar contraste correto nas labels do modal de termos */
+[data-theme="light"] .terms-label { color: #111827 !important; }
+[data-theme="dark"] .terms-label { color: #ffffff !important; }
+
 /* ---------------------------------------------
    Light theme high-contrast tweaks (darker)
    - Stronger secondary text and labels
