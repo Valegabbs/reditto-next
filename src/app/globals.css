@@ -425,3 +425,45 @@ body {
   font-weight: 600;
   text-shadow: 0 1px 0 rgba(255,255,255,0.35), 0 0 1px rgba(0,0,0,0.35);
 }
+
+/* Light theme for Temas page - use same white colors as histórico cards */
+[data-theme="light"] .temas-status-card,
+[data-theme="light"] .temas-theme-card,
+[data-theme="light"] .temas-info-card {
+  background: linear-gradient(180deg, #ffffff 0%, #fbf7ff 100%); /* white -> very light purple */
+  border: 1px solid rgba(124,58,237,0.06); /* subtle purple-tinged border */
+  color: #111827; /* dark text for contrast */
+  box-shadow: 0 6px 18px rgba(43,36,64,0.04);
+}
+
+[data-theme="light"] .temas-status-card .text-gray-300,
+[data-theme="light"] .temas-theme-card .text-gray-300,
+[data-theme="light"] .temas-info-card .text-gray-300 {
+  color: rgba(11,18,32,0.6); /* replace pale gray with clear dark */
+}
+
+[data-theme="light"] .temas-status-card .text-gray-400,
+[data-theme="light"] .temas-theme-card .text-gray-400,
+[data-theme="light"] .temas-info-card .text-gray-400 {
+  color: rgba(11,18,32,0.65);
+}
+
+/* Light theme specific color adjustments for Temas page */
+/* Red circled elements - change to dark gray (more transparent than pure black) */
+[data-theme="light"] .temas-theme-card p,
+[data-theme="light"] .temas-info-card ul li {
+  color: rgba(0,0,0,0.75) !important; /* dark gray with transparency */
+}
+
+/* Blue circled elements - change to lighter purple */
+[data-theme="light"] .temas-theme-card .text-purple-400,
+[data-theme="light"] .temas-theme-card span:last-child {
+  color: #a855f7 !important; /* lighter purple than the original #7734e7 */
+}
+
+/* Light theme - "Atualizado" badge: keep green text, remove background */
+[data-theme="light"] .temas-status-card .bg-green-900\/30 {
+  background: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}

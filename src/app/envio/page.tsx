@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
@@ -14,7 +14,7 @@ import { supabase } from '@/lib/supabase';
 
 type SubmissionType = 'text' | 'image';
 
-export default function EnvioPage() {
+function EnvioPageContent() {
   const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -426,5 +426,24 @@ export default function EnvioPage() {
         </div>
       </div>
     </ClientWrapper>
+  );
+}
+
+export default function EnvioPage() {
+  return (
+    <Suspense fallback={
+      <ClientWrapper showFloatingMenu={false}>
+        <div className="min-h-screen bg-background bg-dot-grid">
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="text-center">
+              <div className="mx-auto mb-4 w-12 h-12 rounded-full border-b-2 border-purple-500 animate-spin"></div>
+              <p className="text-white">Carregando...</p>
+            </div>
+          </div>
+        </div>
+      </ClientWrapper>
+    }>
+      <EnvioPageContent />
+    </Suspense>
   );
 }

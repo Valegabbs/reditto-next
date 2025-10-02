@@ -130,14 +130,6 @@ export default function TemasPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button 
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2 disabled:opacity-50"
-                    aria-label="Atualizar temas"
-                  >
-                    <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
-                  </button>
-                  <button 
                     onClick={() => {
                       const current = document.documentElement.getAttribute('data-theme') || 'dark';
                       const next = current === 'dark' ? 'light' : 'dark';
@@ -156,20 +148,33 @@ export default function TemasPage() {
               </div>
 
               {/* Status dos temas */}
-              <div className="mb-6 p-4 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
-                <div className="flex items-center gap-2 text-sm text-gray-300">
-                  <Clock size={16} />
-                  <span>
-                    {isCached && lastUpdate 
-                      ? `Última atualização: ${lastUpdate}`
-                      : 'Temas atualizados automaticamente a cada 24 horas'
-                    }
-                  </span>
-                  {isCached && (
-                    <span className="ml-2 px-2 py-1 rounded-full bg-green-900/30 text-green-400 text-xs">
-                      Atualizado
+              <div className="mb-6 p-4 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20 temas-status-card">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <Clock size={16} />
+                    <span>
+                      {isCached && lastUpdate 
+                        ? `Última atualização: ${lastUpdate}`
+                        : 'Temas atualizados automaticamente a cada 24 horas'
+                      }
                     </span>
-                  )}
+                    {isCached && (
+                      <span className="ml-2 px-2 py-1 rounded-full bg-green-900/30 text-green-400 text-xs">
+                        Atualizado
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-300">Trocar os Temas</span>
+                    <button 
+                      onClick={handleRefresh}
+                      disabled={refreshing}
+                      className="text-white hover:text-purple-300 transition-colors flex items-center justify-center rounded-full border border-gray-700/60 bg-gray-800/40 hover:bg-gray-800/60 p-2 disabled:opacity-50"
+                      aria-label="Atualizar temas"
+                    >
+                      <RefreshCw size={18} className={refreshing ? 'animate-spin' : ''} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -179,7 +184,7 @@ export default function TemasPage() {
                   <div
                     key={index}
                     onClick={() => handleTemaClick(tema)}
-                    className="p-6 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20 hover:bg-gray-800/30 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/10 group"
+                    className="p-6 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20 hover:bg-gray-800/30 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/10 group temas-theme-card"
                   >
                     <div className="flex items-start gap-3 mb-4">
                       <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-purple-800 flex items-center justify-center">
@@ -207,12 +212,11 @@ export default function TemasPage() {
               </div>
 
               {/* Informações adicionais */}
-              <div className="mt-8 p-4 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20">
+              <div className="mt-8 p-4 rounded-2xl border backdrop-blur-sm border-gray-700/50 bg-gray-800/20 temas-info-card">
                 <h3 className="text-lg font-semibold text-white mb-2">Como funciona?</h3>
                 <ul className="text-sm text-gray-300 space-y-1">
-                  <li>• Os temas são gerados automaticamente por IA a cada 24 horas</li>
+                  <li>• Os temas são alterados a cada 24 horas, sempre as 9:00 da manhã (Horário de Brasília)</li>
                   <li>• Clique em qualquer tema para começar uma redação</li>
-                  <li>• Os temas não são salvos no banco de dados</li>
                   <li>• Use o botão de atualizar para verificar novos temas</li>
                 </ul>
               </div>
