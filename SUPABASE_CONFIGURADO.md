@@ -37,8 +37,8 @@ Configurei completamente seu Supabase usando o MCP! Todas as funcionalidades est
 OPENROUTER_API_KEY=sua_api_key_aqui
 
 # Supabase Configuration (CONFIGURADO AUTOMATICAMENTE)
-NEXT_PUBLIC_SUPABASE_URL=https://imrqgircligznruvudpf.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImltcnFnaXJjbGlnem5ydXZ1ZHBmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcwOTg2OTEsImV4cCI6MjA3MjY3NDY5MX0.O3VORx2CCGdvaQ04ACIme32Y1dlx5S2PjbudxaCNrUs
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sua_anon_key_aqui
 SUPABASE_SERVICE_ROLE_KEY=sua_service_role_key_aqui
 
 # Configurações do servidor
@@ -47,10 +47,11 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
 ### **Para obter a SERVICE_ROLE_KEY:**
-1. Acesse: https://supabase.com/dashboard/project/imrqgircligznruvudpf
-2. Vá em **Settings** → **API**
-3. Copie a **service_role** key
-4. Substitua `sua_service_role_key_aqui` no `.env.local`
+1. Acesse: https://supabase.com/dashboard
+2. Selecione seu projeto
+3. Vá em **Settings** → **API**
+4. Copie a **service_role** key
+5. Substitua `sua_service_role_key_aqui` no `.env.local`
 
 ---
 

@@ -108,15 +108,15 @@ export default function TermsConsentModal({
         </div>
 
         <div className="px-6 mt-4">
-          <div className="h-72 overflow-y-auto rounded-xl border border-gray-700/50 p-4 bg-gray-900/40">
+          <div className="h-72 overflow-y-auto rounded-xl border border-gray-300 p-4" style={{ backgroundColor: '#ffffff', color: '#000000' }}>
             {fetching && (
-              <div className="text-sm text-gray-300">Carregando...</div>
+              <div className="text-sm" style={{ color: '#000000' }}>Carregando...</div>
             )}
             {errorMsg && (
-              <div className="text-sm text-red-300">{errorMsg}</div>
+              <div className="text-sm" style={{ color: '#b91c1c' }}>{errorMsg}</div>
             )}
             {!fetching && !errorMsg && (
-              <div className="prose prose-invert max-w-none">
+              <div className="prose max-w-none" style={{ color: '#000000' }}>
                 {activeTab === 'terms' ? (
                   <ReactMarkdown>{termsContent}</ReactMarkdown>
                 ) : (
@@ -128,7 +128,7 @@ export default function TermsConsentModal({
         </div>
 
         <div className="px-6 mt-5 space-y-3">
-          <label className="flex items-start gap-3 text-sm text-gray-200">
+          <label className="flex items-start gap-3 text-sm terms-label">
             <input
               type="checkbox"
               checked={acceptedTerms}
@@ -137,7 +137,7 @@ export default function TermsConsentModal({
             />
             <span>Declaro que li e aceito os termos de uso do site.</span>
           </label>
-          <label className="flex items-start gap-3 text-sm text-gray-200">
+          <label className="flex items-start gap-3 text-sm terms-label">
             <input
               type="checkbox"
               checked={acceptedPrivacy}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { FileText, Image as ImageIcon, Sparkles, GraduationCap, Zap, Camera, Sun, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import FrameLoadingOverlay from '@/components/FrameLoadingOverlay';
@@ -8,15 +8,16 @@ import ClientWrapper from '../components/ClientWrapper';
 import Disclaimer from '../components/Disclaimer';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import TermsConsentModal from '../components/TermsConsentModal';
 import { supabase } from '@/lib/supabase';
 
 type SubmissionType = 'text' | 'image';
 
-export default function EnvioPage() {
+function EnvioPageContent() {
   const { user, signOut, isConfigured, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [submissionType, setSubmissionType] = useState<SubmissionType>('text');
   const [topic, setTopic] = useState('');
   const [essayText, setEssayText] = useState('');
@@ -27,6 +28,14 @@ export default function EnvioPage() {
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [hasAcceptedConsent, setHasAcceptedConsent] = useState(false);
   // Sidebar e navegação agora são geridos pelo componente Sidebar persistente
+
+  // Capturar tema da URL quando a página carrega
+  useEffect(() => {
+    const temaFromUrl = searchParams.get('tema');
+    if (temaFromUrl) {
+      setTopic(temaFromUrl);
+    }
+  }, [searchParams]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -417,5 +426,24 @@ export default function EnvioPage() {
         </div>
       </div>
     </ClientWrapper>
+  );
+}
+
+export default function EnvioPage() {
+  return (
+    <Suspense fallback={
+      <ClientWrapper showFloatingMenu={false}>
+        <div className="min-h-screen bg-background bg-dot-grid">
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="text-center">
+              <div className="mx-auto mb-4 w-12 h-12 rounded-full border-b-2 border-purple-500 animate-spin"></div>
+              <p className="text-white">Carregando...</p>
+            </div>
+          </div>
+        </div>
+      </ClientWrapper>
+    }>
+      <EnvioPageContent />
+    </Suspense>
   );
 }
