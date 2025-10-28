@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
+  // Garante que o root da workspace seja este repo (evita o aviso de múltiplos lockfiles)
+  outputFileTracingRoot: path.join(__dirname),
   images: {
     domains: ['localhost'],
     unoptimized: true,
